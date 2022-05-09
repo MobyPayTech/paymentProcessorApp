@@ -37,4 +37,6 @@ public class InitResponse {
     private Date createdAt;
     @Column(name = "UpdatedAt")
     private Date updatedAt;
+    @Column(name = "VgsNumber")
+    private String vgsNumber;
 }

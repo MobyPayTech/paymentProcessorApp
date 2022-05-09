@@ -356,10 +356,21 @@ public class PaymentController {
 	        	saveToDB.saveRequestToDB(chargeUserRequest);
 	        	ResponseEntity<String> chargeWithOtp = curlecPaymentService.callChargeNow(chargeUserRequest) ;
 				log.info("ChargeWithResponse url to hit curlec" +chargeWithOtp);
-				JSONObject responseJson = new JSONObject(chargeWithOtp.getBody().toString());
+				JSONObject bodyJson = new JSONObject(chargeWithOtp.getBody().toString());
+				log.info("bodyJson " + bodyJson);
+				JSONObject responseJson = null;
+				if(bodyJson.getJSONArray("Status").get(0).toString().equals("200")) {
+					log.info("Status code in response is  " + bodyJson.getJSONArray("Status").get(0).toString());
+					log.info("Response " + bodyJson.getJSONArray("Response").get(0).toString());
+				responseJson = new JSONObject(bodyJson.getJSONArray("Response").get(0).toString())	;			
 				log.info("responseJson " + responseJson);
+				
+				log.info("chargeWithOtp " + chargeWithOtp);
+				log.info("Status code " + chargeWithOtp.getStatusCode().toString());
+				
 
-				if(chargeWithOtp != null && chargeWithOtp.getStatusCode().toString().equals("200") && responseJson.get("cc_transaction_id") != null) {
+				if(chargeWithOtp != null && chargeWithOtp.getStatusCode().toString().contains("200 OK") && bodyJson.getJSONArray("Status").get(0).toString().equals("200")) {
+					log.info("Inside Condition Success ");
 					paymentResponse.setResponseCode("00");
 					paymentResponseDB.setResponseCode("00");
 					
@@ -380,20 +391,25 @@ public class PaymentController {
 						paymentResponse.setRefNumber(responseJson.getJSONArray("reference_number").get(0).toString());
 						paymentResponseDB.setRefNumber(responseJson.getJSONArray("reference_number").get(0).toString());
 					}
-				}else if(chargeWithOtp != null && !chargeWithOtp.getStatusCode().toString().equals("200")){
-					if(responseJson.get("Message") != null)
-						paymentResponse.setErrorMsg(responseJson.getJSONArray("Message").get(0).toString());
-					else
+				}
+				}else if(chargeWithOtp != null && chargeWithOtp.getStatusCode().toString().contains("200") && !bodyJson.getJSONArray("Status").get(0).toString().equals("200")){
+					log.info("Status code in else loop is  " + bodyJson.getJSONArray("Status").get(0).toString());
+					if(!bodyJson.getJSONArray("Message").get(0).toString().isEmpty() && ! bodyJson.getJSONArray("Message").get(0).toString().isBlank() ) {
+						paymentResponse.setErrorMsg(bodyJson.getJSONArray("Message").get(0).toString());
+						paymentResponse.setResponseCode("01");
+					}
+					
+					else {
 						paymentResponse.setErrorMsg("FAILURE");
 					paymentResponse.setResponseCode("01");
 					paymentResponseDB.setResponseCode("01");
+					}
 				} else if(chargeWithOtp == null){
 					paymentResponse.setErrorMsg("FAILURE");
 					paymentResponse.setResponseCode("01");
 					paymentResponseDB.setResponseCode("01");
 				}
 	        }
-	        
 	        saveToDB.saveResponseToDB(paymentResponseDB);
 	        }catch(Exception e) {
 	        	paymentResponse.setErrorMsg(e.getLocalizedMessage());

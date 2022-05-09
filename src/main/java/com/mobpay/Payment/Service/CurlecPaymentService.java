@@ -100,12 +100,12 @@ log.info("Inside callChargeWithOtpUrl");
 		refNo = generateRefNo(initMandate.getClientType());
 		
 			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo 
-					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=1.00"  
+					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"  
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 					+ initMandate.getNameOnCard().replace(" ", "%20")+ "&emailAddress=" + initMandate.getEmail()
 					+ "&phoneNumber=" + initMandate.getMobileNo()
 					+ "&idType=NRIC&idValue=" +initMandate.getIdValue() +"&linkId=Notes"
-					+ "&merchantId=5354721&employeeId=536358&method=05&paymentMethod=2";
+					+ "&merchantId=5354721&employeeId=536358&method=04&paymentMethod=2";
 			
 		log.info("Invoke curlec new mandate API :"+url);
 
@@ -128,10 +128,14 @@ log.info("Inside callChargeWithOtpUrl");
     			JSONArray responseJSON = new JSONArray(responseObj.toString());
     			Object responseObjFromArr = responseJSON.get(0);
     			JSONObject responseJsonObj = new JSONObject(responseObjFromArr.toString());
-    			JSONArray sellerorder = responseJsonObj.getJSONArray("fpx_sellerExOrderNo");
+    			JSONArray sellerorder = responseJsonObj.getJSONArray("fpx_sellerOrderNo");
+    			JSONArray sellerExorder = responseJsonObj.getJSONArray("fpx_sellerExOrderNo");
 
     			 initResponse.setRefNumber(sellerorder.get(0).toString());
     			 initResponsedb.setRefNumber(sellerorder.get(0).toString());
+    			 
+    			 initResponse.setVgsNumber(sellerExorder.get(0).toString());
+    			 initResponsedb.setVgsNumber(sellerExorder.get(0).toString());
     			 log.info("initResponse " + initResponse);
     		} else if (response == null) {
     			initResponse.setResponseCode("01");

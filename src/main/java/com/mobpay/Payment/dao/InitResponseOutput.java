@@ -17,4 +17,5 @@ public class InitResponseOutput {
     private String merchantId;
     private String responseCode;
     private String refNumber;
+    private String vgsNumber;
 }
