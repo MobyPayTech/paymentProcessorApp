@@ -40,6 +40,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,6 +117,8 @@ public class PaymentController {
   
   List<String> getuniqueId =new ArrayList<String>();
 
+private String merchantCallbackUrl;
+
 
     private String genrateUniqueId() {
     	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -131,15 +135,65 @@ public class PaymentController {
 	}
 
 
-    @PostMapping(value = "/curleccallback")
-    public Object getCurlecCallback(@RequestBody CurlecCallback curlecCallback)
+   // @PostMapping(value = "/curleccallback")
+  /*  @RequestMapping(value = {"/curleccallback"}, method = RequestMethod.POST,consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String getCurlecCallback(@RequestParam Object cc_transaction_id, @RequestParam Object invoice_number,
+    		@RequestParam Object collection_status,
+    		@RequestParam Object reference_number)
             throws Exception {
+    	CurlecCallback curlecCallbackResponse = new CurlecCallback();
+    	 log.info("Inside curleccallback " +cc_transaction_id);
+    	curlecCallbackResponse.setCcTransactionId(curlecCallback.get("cc_transaction_id").toString())  ;
+    	 curlecCallbackResponse.setBillCode(curlecCallback.get("invoice_number").toString())  ;
+    	 curlecCallbackResponse.setCollectionStatus(curlecCallback.get("collection_status").toString())  ;
+    	 curlecCallbackResponse.setRefNumber(curlecCallback.get("reference_number").toString())  ;
+    	 
+    	 log.info("curlecCallbackResponse " +curlecCallbackResponse);
+    	 
+    	 return "POST Response";
+    }
+    */
+    @RequestMapping(value = {"/curleccallback"}, method = RequestMethod.GET)
+    public String getCurlecCallbackGet(@RequestParam String cc_transaction_id)
+    		/*, @RequestParam Object invoice_number,
+    		@RequestParam Object fpx_collectionStatus,
+    		@RequestParam Object fpx_sellerOrderNo)*/
+            throws Exception {
+    	 log.info("Inside curleccallback GET" );
+    	 
     	
-    	 log.info("Inside curleccallback " +curlecCallback);
-    	
-    	 return curlecCallback;
+    	 return "GET Response";
     }
     
+    @RequestMapping(value = {"/curleccallback"}, method = RequestMethod.POST,consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public HttpStatus getCurlecCallback(@RequestParam Object cc_transaction_id, @RequestParam Object invoice_number,
+    		@RequestParam Object fpx_collectionStatus,
+    		@RequestParam Object fpx_sellerOrderNo)
+            throws Exception {
+    	CurlecCallback curlecCallbackResponse = new CurlecCallback();
+    	ResponseEntity<String> responseFromMerchant;
+    	 log.info("Inside curleccallback " +cc_transaction_id);
+    	 HttpStatus status = HttpStatus.OK;
+    	 /* JSONObject jsonRequest = new JSONObject(curlecCallback.toString());
+    	curlecCallbackResponse.setCcTransactionId(jsonRequest.getJSONArray("cc_transaction_id").get(0).toString())  ;
+    	 curlecCallbackResponse.setBillCode(jsonRequest.getJSONArray("invoice_number").get(0).toString())  ;
+    	 curlecCallbackResponse.setCollectionStatus(jsonRequest.getJSONArray("fpx_collectionStatus").get(0).toString())  ;
+    	 curlecCallbackResponse.setRefNumber(jsonRequest.getJSONArray("fpx_sellerOrderNo").get(0).toString())  ;
+    	 */
+    	 
+    	 curlecCallbackResponse.setCcTransactionId(cc_transaction_id.toString())  ;
+    	 curlecCallbackResponse.setBillCode(invoice_number.toString())  ;
+    	 curlecCallbackResponse.setCollectionStatus(fpx_collectionStatus.toString())  ;
+    	 curlecCallbackResponse.setRefNumber(fpx_sellerOrderNo.toString())  ;
+    	 
+    	 log.info("curlecCallbackResponse " +curlecCallbackResponse);
+    	 log.info("merchantCallbackUrl " +merchantCallbackUrl);
+    	 //TODO remove as it is used for this endpoint testing
+    	// merchantCallbackUrl = "https://quocent.com/payment";
+    	 responseFromMerchant =  curlecPaymentService.callCurlecCallback(curlecCallbackResponse,merchantCallbackUrl);
+    	 log.info("responseFromMerchant " +responseFromMerchant);
+    	 return status;
+    }
     
     //Mobiversa API call
     @GetMapping(value = "/paymentwithotp")
@@ -330,12 +384,16 @@ public class PaymentController {
     	 */
 	        
 	        log.info("chargeUserRequest " +chargeUserRequest);
+	        merchantCallbackUrl = chargeUserRequest.getCallBackUrl();
+	        log.debug("merchantCallbackUrl " +merchantCallbackUrl);
+	        chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
+	        log.debug("chargeUserRequest after setting payment callback url " +chargeUserRequest);
 	        log.info("WithOtp " +chargeUserRequest.getWithOtp());
 	        boolean withotp = chargeUserRequest.getWithOtp();
 	        
 	        try {
 	        if(withotp) {
-	        	 chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
+	        	chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 	        	 saveToDB.saveRequestToDB(chargeUserRequest);
 	        	String curlecRequestUrl = curlecPaymentService.callChargeWithOtpUrl(chargeUserRequest) ;
 				log.info("ChargeWithOtpResponse url to hit curlec" +curlecRequestUrl);
@@ -409,6 +467,10 @@ public class PaymentController {
 					paymentResponse.setResponseCode("01");
 					paymentResponseDB.setResponseCode("01");
 				}
+	        }
+	        if(chargeUserRequest.getCallBackUrl() != null) {
+	        	log.info("Callback is not null" );
+	        	
 	        }
 	        saveToDB.saveResponseToDB(paymentResponseDB);
 	        }catch(Exception e) {

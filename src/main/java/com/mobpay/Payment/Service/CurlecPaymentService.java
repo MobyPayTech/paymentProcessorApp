@@ -5,8 +5,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -17,6 +20,8 @@ import com.mobpay.Payment.Repository.NewMandateRequestDtoEntityRepository;
 import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
+import com.mobpay.Payment.dao.ChargeUserResponseOutput;
+import com.mobpay.Payment.dao.CurlecCallback;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitPayment;
 import com.mobpay.Payment.dao.InitPaymentRepository;
@@ -37,11 +42,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.mobpay.Payment.dao.PaymentRequest;
@@ -69,16 +76,20 @@ public class CurlecPaymentService {
     @Value("${curlec.url}")
     private String curlecUrl;
     
+    @Value("${payment.callback.url}")
+    private String paymentCallBackUrl; 
     
-    RestTemplate restTemplate = new RestTemplate();
+    
+    static RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<String> result = null;
 
 	public String callChargeWithOtpUrl(ChargeUserRequest paymentRequest) {
+		DecimalFormat df = new DecimalFormat("0.00");
 		RestTemplate restTemplate = new RestTemplate();
 		String url = "";
-log.info("Inside callChargeWithOtpUrl");
+		log.info("Inside callChargeWithOtpUrl");
 		url = curlecUrl + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
-				+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber="
+				+ paymentRequest.getRefNumber() + "&collectionAmount=" +paymentRequest.getAmount() + "&invoiceNumber="
 				+ paymentRequest.getBillCode() +"&collectionCallbackUrl=" +paymentRequest.getCallBackUrl() + 
 				"&redirectUrl=" +paymentRequest.getRedirectUrl() +"&method=chargenowOTP";
 		log.info("URL in callChargeWithOtpUrl " +url);
@@ -252,7 +263,7 @@ log.info("Inside callChargeWithOtpUrl");
 		
 		 HttpHeaders headers = new HttpHeaders();
 		 headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		 log.info("Invoke curlec callNow :"+url);
+		 log.info("Invoke curlec callNow : "+url);
 		 
 		 MultiValueMap<String, Object> map= new LinkedMultiValueMap<String, Object>();
 		 map.add("employeeId", "536358");
@@ -260,11 +271,13 @@ log.info("Inside callChargeWithOtpUrl");
 		 map.add("collectionAmount", paymentRequest.getAmount());
 		 map.add("refNumber", paymentRequest.getRefNumber());
 		 map.add("invoiceNumber", paymentRequest.getBillCode());
-
+		 map.add("collectionCallbackUrl", paymentRequest.getCallBackUrl());
+		 map.add("redirectUrl", paymentRequest.getRedirectUrl());
+		 log.info("Invoke curlec callNow with request body: "+map);
 		 HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(map, headers);
 
 		 chargeNowResponse = restTemplate.postForEntity( url, request , String.class );
-	return chargeNowResponse;
+		 return chargeNowResponse;
 	}
 
 	 public String CurlecResponse(PaymentRequest paymentRequest, String referrnecnumbers, String merchantID) throws Exception {
@@ -477,4 +490,40 @@ log.info("Inside callChargeWithOtpUrl");
 	            e.printStackTrace();
 	        }
 	    }
+	 
+	 
+	public static ResponseEntity<String> callCurlecCallback(CurlecCallback curlecCallback, String merchantCallbackUrl) {
+		String url = "";
+		ResponseEntity<String> callbackResponse = new ResponseEntity(HttpStatus.OK);
+		try {
+		if (merchantCallbackUrl != null && !merchantCallbackUrl.isBlank()) {
+
+			url = merchantCallbackUrl;
+			log.info("Invoking merchant site to relay callback response : " + url);
+			List<MediaType> listM = new ArrayList<>();
+			listM.add(MediaType.APPLICATION_JSON);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(listM);
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			
+			
+			HttpEntity<CurlecCallback> request = new HttpEntity<CurlecCallback>(curlecCallback, headers);
+			log.info("Request to merchant callback : " + request);
+			log.info("curlecCallback Request to merchant callback : " + request.getBody());
+			callbackResponse = restTemplate.postForEntity(url, request, String.class);
+			log.info("Response from merchant callback : " + callbackResponse);
+		}
+		else {
+			log.info(" Cannot invoke merchant site as callbackUrl is empty..!");
+			
+		}}
+		catch(HttpClientErrorException e) {
+			log.info(" Exception from merchant server " +e.getLocalizedMessage());
+			
+		}
+		 return callbackResponse;
+		
+	}
+	
+	
 }

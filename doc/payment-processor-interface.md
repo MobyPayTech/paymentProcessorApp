@@ -52,7 +52,7 @@ https://sandbox.payment.mobypay.my/api/payment/{version}
   <summary>Click to expand</summary>
 
 ```plantuml
-@startuml "payment-sequence-diagram-v1.2.1"
+@startuml "payment-sequence-diagram-v1.3.0"
 !theme plain
 skinparam ParticipantPadding 20
 skinparam BoxPadding 10
@@ -73,9 +73,9 @@ Server -> PP : Request POST /initmandate
 PP -> Curlec : Request /curlec-services/mandate
 note left: amount will be fixed to 'RM 1.00'.
 Curlec -> PP : Response with `fpx_sellerOrderNo`
-PP -> Server : Response with `fpx_sellerOrderNo` as `refNumber` and `merchantId`
-Server -> MP : Response `refNumber` and `merchantId`
-MP -> VGS ** : Request with card details,`refNumber` as `transactionId` and `merchantId` as `merchantId`)
+PP -> Server : Response with `fpx_sellerOrderNo` as `refNumber`, `fpx_sellerExOrderNo` as `vgsNumber` and `merchantId`
+Server -> MP : Response `vgsNumber` and `merchantId`
+MP -> VGS ** : Request with card details,`vgsNumber` as `transactionId` and `merchantId` as `merchantId`)
 VGS -> MP : Response with status
 note left : "VGS will return json data with `html` property \n if the card add is successful. \n If the card add fails, VGS will return json data \n with `errors` property"
 MP -> Server : Request with card add status.
@@ -140,8 +140,6 @@ PP -> Server : Response with `collectionStatus`
 
 ## ENUM Definitions
 
----
-
 ### Client Type (`clientType`)
 
 | Client Type (`clientType`) | Description |
@@ -204,18 +202,20 @@ Schema: `application/json`
 
 Schema: `application/json`
 
-| Property       | Type   | Description                                                                                       |
-| -------------- | ------ | ------------------------------------------------------------------------------------------------- |
-| `responseCode` | String | Refer to **Response Code**.                                                                       |
-| `errorMsg`     | String | Refer to **Error Message**.                                                                       |
-| `merchantId`   | String | Required for `merchantId` in VGS Endpoint.                                                        |
-| `refNumber`    | String | The reference number of the mandate. Required for Charge API and `transactionId` in VGS Endpoint. |
+| Property       | Type   | Description                                                                                 |
+| -------------- | ------ | ------------------------------------------------------------------------------------------- |
+| `responseCode` | String | Refer to **Response Code**.                                                                 |
+| `errorMsg`     | String | Refer to **Error Message**.                                                                 |
+| `merchantId`   | String | Required for `merchantId` in VGS Endpoint.                                                  |
+| `refNumber`    | String | The reference number of the mandate. Required for Charge API.                               |
+| `vgsNumber`    | String | The external reference number of the mandate. Required for `transactionId` in VGS Endpoint. |
 
 ```json
 {
   "responseCode": "00",
   "merchantId": "5354721",
-  "refNumber": "AP0000000001"
+  "refNumber": "AP0000000001",
+  "vgsNumber": "xbs-23093043-s34"
 }
 ```
 
@@ -248,6 +248,7 @@ Schema: `application/json`
   "clientType": 1,
   "amount": 100.0,
   "refNumber": "AP0000000001",
+  "billCode": "120398093",
   "withOtp": true,
   "redirectUrl": "https://.....",
   "callbackUrl": "https://....."
@@ -261,6 +262,7 @@ Schema: `application/json`
   "clientType": 1,
   "amount": 100.0,
   "refNumber": "AP0000000001",
+  "billCode": "120398093",
   "withOtp": false,
   "callbackUrl": "https://....."
 }
@@ -287,7 +289,7 @@ Schema: `application/json`
   "responseCode": "00",
   "chargeNowWithOtpUrl": "https://....",
   "refNumber": "AP0000000001",
-  "billCode": "20934893"
+  "billCode": "120398093"
 }
 ```
 
@@ -298,7 +300,7 @@ Schema: `application/json`
   "responseCode": "00",
   "ccTransactionId": "12093840930",
   "refNumber": "AP0000000001",
-  "billCode": "20934893",
+  "billCode": "120398093",
   "collectionStatus": "SUCCESSFULLY_COMPLETE"
 }
 ```
@@ -317,7 +319,7 @@ Schema: `application/json`
 ```json
 {
   "refNumber": "AP0000000001",
-  "billCode": "430943",
+  "billCode": "120398093",
   "ccTransactionId": "6049038434",
   "collectionStatus": "SUCCESSFULLY_COMPLETE"
 }
@@ -389,7 +391,7 @@ https://tntfrffpxdd.sandbox.verygoodproxy.com/creditCard/vgsMandate -H "Content-
 | Property        | Type   | Description                                      |
 | --------------- | ------ | ------------------------------------------------ |
 | `merchantId`    | String | The `merchantId` received from Init Mandate API. |
-| `transactionId` | String | The `refNumber` received from Init Mandate API.  |
+| `transactionId` | String | The `vgsNumber` received from Init Mandate API.  |
 | `type`          | String | Fixed value: `mandate`                           |
 | `card_name`     | String | The cardholder's name.                           |
 | `card_number`   | String | The card number (PAN).                           |
