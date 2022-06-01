@@ -172,7 +172,7 @@ private String merchantCallbackUrl;
             throws Exception {
     	CurlecCallback curlecCallbackResponse = new CurlecCallback();
     	ResponseEntity<String> responseFromMerchant;
-    	 log.info("Inside curleccallback " +cc_transaction_id);
+    	 log.info("Inside curleccallback " +fpx_sellerOrderNo + "and  invoice number " +invoice_number);
     	 HttpStatus status = HttpStatus.OK;
     	 /* JSONObject jsonRequest = new JSONObject(curlecCallback.toString());
     	curlecCallbackResponse.setCcTransactionId(jsonRequest.getJSONArray("cc_transaction_id").get(0).toString())  ;
@@ -180,9 +180,10 @@ private String merchantCallbackUrl;
     	 curlecCallbackResponse.setCollectionStatus(jsonRequest.getJSONArray("fpx_collectionStatus").get(0).toString())  ;
     	 curlecCallbackResponse.setRefNumber(jsonRequest.getJSONArray("fpx_sellerOrderNo").get(0).toString())  ;
     	 */
-    	 
+    	 log.info("billCode " +invoice_number.toString().split("-")[0]);
     	 curlecCallbackResponse.setCcTransactionId(cc_transaction_id.toString())  ;
-    	 curlecCallbackResponse.setBillCode(invoice_number.toString())  ;
+    	 curlecCallbackResponse.setBillCode(invoice_number.toString().split("-")[0]);
+    	 curlecCallbackResponse.setInvoiceNumber(invoice_number.toString())  ;
     	 curlecCallbackResponse.setCollectionStatus(fpx_collectionStatus.toString())  ;
     	 curlecCallbackResponse.setRefNumber(fpx_sellerOrderNo.toString())  ;
     	 
@@ -399,12 +400,14 @@ private String merchantCallbackUrl;
 				log.info("ChargeWithOtpResponse url to hit curlec" +curlecRequestUrl);
 				if(curlecRequestUrl != null) {
 					paymentResponse.setChargeNowWithOtpUrl(curlecRequestUrl);
-					paymentResponse.setBillCode(chargeUserRequest.getBillCode()	);
+					paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
+					paymentResponse.setBillCode(chargeUserRequest.getBillCode()  );
 					paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
 					//truncate since it is long
 					String curlecUrl = curlecRequestUrl.substring(33);
 					paymentResponseDB.setChargeNowWithOtpUrl(curlecUrl);
-					paymentResponseDB.setBillCode(chargeUserRequest.getBillCode()	);
+					paymentResponseDB.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo() );
+					paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
 					paymentResponseDB.setRefNumber(chargeUserRequest.getRefNumber());
 				} else if(curlecRequestUrl == null){
 					paymentResponse.setErrorMsg("FAILURE");
@@ -438,8 +441,10 @@ private String merchantCallbackUrl;
 						paymentResponseDB.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
 					}
 					if(responseJson.get("invoice_number") != null && responseJson.getJSONArray("invoice_number").get(0).toString() != null) {
-						paymentResponse.setBillCode(responseJson.getJSONArray("invoice_number").get(0).toString());
-						paymentResponseDB.setBillCode(responseJson.getJSONArray("invoice_number").get(0).toString());
+						paymentResponse.setBillCode(chargeUserRequest.getBillCode());
+						paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
+						paymentResponse.setInvoiceNumber(responseJson.getJSONArray("invoice_number").get(0).toString());
+						paymentResponseDB.setInvoiceNumber(responseJson.getJSONArray("invoice_number").get(0).toString());
 					}
 					if(responseJson.get("cc_transaction_id") != null && responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
 						paymentResponse.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());

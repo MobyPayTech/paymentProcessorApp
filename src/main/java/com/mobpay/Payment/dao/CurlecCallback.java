@@ -15,6 +15,7 @@ public class CurlecCallback {
 		  
 	  String refNumber;
 	  String billCode;
+	  String invoiceNumber;
 	  String ccTransactionId;
 	  String collectionStatus;
 }

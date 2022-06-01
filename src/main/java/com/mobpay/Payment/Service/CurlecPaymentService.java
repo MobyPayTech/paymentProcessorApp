@@ -90,7 +90,7 @@ public class CurlecPaymentService {
 		log.info("Inside callChargeWithOtpUrl");
 		url = curlecUrl + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
 				+ paymentRequest.getRefNumber() + "&collectionAmount=" +paymentRequest.getAmount() + "&invoiceNumber="
-				+ paymentRequest.getBillCode() +"&collectionCallbackUrl=" +paymentRequest.getCallBackUrl() + 
+				+ paymentRequest.getBillCode() + "-" +paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" +paymentRequest.getCallBackUrl() + 
 				"&redirectUrl=" +paymentRequest.getRedirectUrl() +"&method=chargenowOTP";
 		log.info("URL in callChargeWithOtpUrl " +url);
 		return url;
@@ -270,7 +270,7 @@ public class CurlecPaymentService {
 		 map.add("merchantId", "5354721");
 		 map.add("collectionAmount", paymentRequest.getAmount());
 		 map.add("refNumber", paymentRequest.getRefNumber());
-		 map.add("invoiceNumber", paymentRequest.getBillCode());
+		 map.add("invoiceNumber", paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo() );
 		 map.add("collectionCallbackUrl", paymentRequest.getCallBackUrl());
 		 map.add("redirectUrl", paymentRequest.getRedirectUrl());
 		 log.info("Invoke curlec callNow with request body: "+map);

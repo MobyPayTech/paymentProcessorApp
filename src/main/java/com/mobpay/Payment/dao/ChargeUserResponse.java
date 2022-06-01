@@ -37,6 +37,8 @@ public class ChargeUserResponse {
 		private String method;
 		@Column(name = "billCode")
 		private String billCode;
+		@Column(name = "invoiceNumber")
+		private String invoiceNumber;
 		@Column(name = "cc_transaction_id")
 		private String cc_transaction_id;
 		@Column(name = "refNumber")

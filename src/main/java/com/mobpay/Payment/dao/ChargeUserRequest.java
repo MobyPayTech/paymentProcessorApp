@@ -35,6 +35,8 @@ public class ChargeUserRequest {
     public Boolean withOtp;
     @Column(name = "refNumber")
     private String refNumber;
+    @Column(name = "uniqueRequestNo")
+    private String uniqueRequestNo;
     @Column(name = "CreatedAt")
     private Date createdAt;
     @Column(name = "UpdatedAt")

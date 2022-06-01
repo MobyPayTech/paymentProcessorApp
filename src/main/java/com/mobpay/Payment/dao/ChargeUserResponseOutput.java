@@ -20,6 +20,7 @@ public class ChargeUserResponseOutput {
 
 	private String collection_status;
 	private String billCode;
+	private String invoiceNumber;
 	private String ccTransactionId;
 	private String refNumber;
 	
