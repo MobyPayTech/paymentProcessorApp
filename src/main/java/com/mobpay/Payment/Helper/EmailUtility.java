@@ -12,7 +12,7 @@ public class EmailUtility {
                 .from("Mobypay Error Events", "noreply@airapay.my");
 
         Mail.using(configuration)
-                .to("selva@mobypay.my")
+                .to("sushmidha@mobypay.my")
                 .subject("Error Events")
                 .text("This is a test")
                 .build()

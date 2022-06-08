@@ -17,6 +17,7 @@ import com.mobpay.Payment.ReadProperties;
 import com.mobpay.Payment.Repository.CollectionStatusRequest;
 import com.mobpay.Payment.Repository.MobyversaMandateRequestDtoEntityRepository;
 import com.mobpay.Payment.Repository.NewMandateRequestDtoEntityRepository;
+import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
@@ -71,13 +72,16 @@ public class CurlecPaymentService {
     MobyversaMandateRequestDtoEntityRepository mobyversaMandateRequestDtoEntityRepository;
 
     @Autowired
+	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
+	
+    @Autowired
     SaveToDB saveToDB;
     
-    @Value("${curlec.url}")
-    private String curlecUrl;
+   // @Value("${curlec.url}")
+    protected String curlecUrl;
     
-    @Value("${payment.callback.url}")
-    private String paymentCallBackUrl; 
+   // @Value("${payment.callback.url}")
+  //  protected String paymentCallBackUrl; 
     
     
     static RestTemplate restTemplate = new RestTemplate();
@@ -88,6 +92,7 @@ public class CurlecPaymentService {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = "";
 		log.info("Inside callChargeWithOtpUrl");
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		url = curlecUrl + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
 				+ paymentRequest.getRefNumber() + "&collectionAmount=" +paymentRequest.getAmount() + "&invoiceNumber="
 				+ paymentRequest.getBillCode() + "-" +paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" +paymentRequest.getCallBackUrl() + 
@@ -109,7 +114,7 @@ public class CurlecPaymentService {
 		ResponseEntity<String> response = null;
 		InitResponseOutput initResponse = new InitResponseOutput();
 		refNo = generateRefNo(initMandate.getClientType());
-		
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo 
 					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"  
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
@@ -233,6 +238,7 @@ public class CurlecPaymentService {
 	public ResponseEntity<String> checkCurlecStatus(String ccTransactionId) {
 		String url = "";
 		ResponseEntity<String> statusResponse = null;
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		
 		url = curlecUrl + "checkstatuscc";
 		log.info("Invoke curlec to check collection status :"+url);
@@ -258,7 +264,7 @@ public class CurlecPaymentService {
 	public ResponseEntity<String> callChargeNow(ChargeUserRequest paymentRequest) {
 		String url = "";
 		ResponseEntity<String> chargeNowResponse = null;
-		
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		url = curlecUrl + "curlec-services?method=60";
 		
 		 HttpHeaders headers = new HttpHeaders();

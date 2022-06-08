@@ -8,6 +8,7 @@ import com.mobpay.Payment.Repository.CollectionStatusRequest;
 import com.mobpay.Payment.Repository.MobiCallBackConstructorRespository;
 import com.mobpay.Payment.Repository.MobiCallBackDtoEntityRepository;
 import com.mobpay.Payment.Repository.MobiPaymentResponseEntityRepository;
+import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.Repository.PaymentRequestEntityRepository;
 import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.Service.AddCardService;
@@ -109,8 +110,11 @@ public class PaymentController {
     @Autowired
     SaveToDB saveToDB;
     
-    @Value("${payment.callback.url}")
-    private String paymentCallBackUrl; 
+    @Autowired
+	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
+	
+   // @Value("${payment.callback.url}")
+    protected String paymentCallBackUrl; 
     
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<String> result = null;
@@ -386,6 +390,7 @@ private String merchantCallbackUrl;
 	        
 	        log.info("chargeUserRequest " +chargeUserRequest);
 	        merchantCallbackUrl = chargeUserRequest.getCallBackUrl();
+	        paymentCallBackUrl = paymentProcessorConfigRepository.findValueFromName("payment.callback.url");
 	        log.debug("merchantCallbackUrl " +merchantCallbackUrl);
 	        chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 	        log.debug("chargeUserRequest after setting payment callback url " +chargeUserRequest);
