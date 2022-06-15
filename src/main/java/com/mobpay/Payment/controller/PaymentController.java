@@ -1,12 +1,10 @@
 package com.mobpay.Payment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mobpay.Payment.DbConfig;
 import com.mobpay.Payment.Encryption.SHA;
 import com.mobpay.Payment.Helper.PaymentValidation;
 import com.mobpay.Payment.Repository.CallBackDtoEntityRepository;
 import com.mobpay.Payment.Repository.CollectionStatusRequest;
-import com.mobpay.Payment.Repository.InitMandateResponseEntityRepository;
 import com.mobpay.Payment.Repository.MobiCallBackConstructorRespository;
 import com.mobpay.Payment.Repository.MobiCallBackDtoEntityRepository;
 import com.mobpay.Payment.Repository.MobiPaymentResponseEntityRepository;
@@ -26,10 +24,10 @@ import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
 import com.mobpay.Payment.dao.CurlecCallbackResponse;
 import com.mobpay.Payment.dao.InitMandate;
+import com.mobpay.Payment.dao.InitResponse;
 import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.MobiCallBackDto;
 import com.mobpay.Payment.dao.MobiversaPaymentResponse;
-import com.mobpay.Payment.dao.PaymentLogs;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
@@ -46,14 +44,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
@@ -67,14 +63,13 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 @Slf4j
-@Controller
+@RestController
 @RequestMapping(value = "/api/payment/v2.0.0")
 public class PaymentController {
 
@@ -116,14 +111,10 @@ public class PaymentController {
     SaveToDB saveToDB;
     
     @Autowired
-	DbConfig dbconfig;
-    
-    @Autowired
-    InitMandateResponseEntityRepository initMandateResponseEntityRepository;
+	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
 	
    // @Value("${payment.callback.url}")
     protected String paymentCallBackUrl; 
-    protected String simulator = null;
     
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<String> result = null;
@@ -132,7 +123,6 @@ public class PaymentController {
 
 private String merchantCallbackUrl;
 
-private String ccTransactionId ;
 
     private String genrateUniqueId() {
     	DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -167,7 +157,18 @@ private String ccTransactionId ;
     	 return "POST Response";
     }
     */
-    @ResponseBody
+    @RequestMapping(value = {"/curleccallback"}, method = RequestMethod.GET)
+    public String getCurlecCallbackGet(@RequestParam String cc_transaction_id)
+    		/*, @RequestParam Object invoice_number,
+    		@RequestParam Object fpx_collectionStatus,
+    		@RequestParam Object fpx_sellerOrderNo)*/
+            throws Exception {
+    	 log.info("Inside curleccallback GET" );
+    	 
+    	
+    	 return "GET Response";
+    }
+    
     @RequestMapping(value = {"/curleccallback"}, method = RequestMethod.POST,consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public HttpStatus getCurlecCallback(@RequestParam Object cc_transaction_id, @RequestParam Object invoice_number,
     		@RequestParam Object fpx_collectionStatus,
@@ -177,6 +178,12 @@ private String ccTransactionId ;
     	ResponseEntity<String> responseFromMerchant;
     	 log.info("Inside curleccallback " +fpx_sellerOrderNo + "and  invoice number " +invoice_number);
     	 HttpStatus status = HttpStatus.OK;
+    	 /* JSONObject jsonRequest = new JSONObject(curlecCallback.toString());
+    	curlecCallbackResponse.setCcTransactionId(jsonRequest.getJSONArray("cc_transaction_id").get(0).toString())  ;
+    	 curlecCallbackResponse.setBillCode(jsonRequest.getJSONArray("invoice_number").get(0).toString())  ;
+    	 curlecCallbackResponse.setCollectionStatus(jsonRequest.getJSONArray("fpx_collectionStatus").get(0).toString())  ;
+    	 curlecCallbackResponse.setRefNumber(jsonRequest.getJSONArray("fpx_sellerOrderNo").get(0).toString())  ;
+    	 */
     	 log.info("billCode " +invoice_number.toString().split("-")[0]);
     	 curlecCallbackResponse.setCcTransactionId(cc_transaction_id.toString())  ;
     	 curlecCallbackResponse.setBillCode(invoice_number.toString().split("-")[0]);
@@ -194,7 +201,6 @@ private String ccTransactionId ;
     }
     
     //Mobiversa API call
-    @ResponseBody
     @GetMapping(value = "/paymentwithotp")
     public Object processFirstPayment(@RequestParam(value = "serviceName", required = false) String serviceName , @RequestParam(value = "loginId") String loginId,
     		@RequestParam(value = "mobileNo") String mobileNo , @RequestParam(value = "customerName") String customerName,
@@ -333,7 +339,6 @@ private String ccTransactionId ;
     }
 
     //Curlec
-    @ResponseBody
     @PostMapping(value = "/initmandate")
 	public Object callInitMandate(@RequestBody InitMandate initMandate) throws Exception {
 		log.info("Inside initpayment" +initMandate);
@@ -352,11 +357,6 @@ private String ccTransactionId ;
 			initResponse = curlecPaymentService.callCurlecNewMandateService(initMandate) ;
 			log.info("Response from Curlec service " +initResponse);
 		}
-		//To add logs in DB
-				PaymentLogs paymentLogs = new PaymentLogs();
-				paymentLogs.setRequest(initMandate.toString());
-				paymentLogs.setResponse(initResponse.toString());
-				saveToDB.saveRequestToDB(paymentLogs);
 		}
 		catch(InternalServerError e ) {
 			log.error("Exception in init payment" + e);
@@ -373,14 +373,13 @@ private String ccTransactionId ;
     
     
     //Curlec
-    @ResponseBody
     @PostMapping(value = "/charge")
     public Object generateCurlecUrl(@RequestBody ChargeUserRequest chargeUserRequest)
             throws Exception {
     	 log.info("Inside charge ");
     	 ChargeUserResponse paymentResponseDB = new ChargeUserResponse();
     	 ChargeUserResponseOutput paymentResponse = new ChargeUserResponseOutput();
-    	
+    	 ResponseEntity<String> response = null;
     	/* chargeUserRequest.setAmount(amount);
     	
     	 chargeUserRequest.setRedirectUrl(redirectUrl);
@@ -391,51 +390,13 @@ private String ccTransactionId ;
 	        
 	        log.info("chargeUserRequest " +chargeUserRequest);
 	        merchantCallbackUrl = chargeUserRequest.getCallBackUrl();
-	        HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-	        paymentCallBackUrl = dbvalues.get("payment.callback.url");
+	        paymentCallBackUrl = paymentProcessorConfigRepository.findValueFromName("payment.callback.url");
 	        log.debug("merchantCallbackUrl " +merchantCallbackUrl);
 	        chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 	        log.debug("chargeUserRequest after setting payment callback url " +chargeUserRequest);
 	        log.info("WithOtp " +chargeUserRequest.getWithOtp());
-	        
-	        paymentCallBackUrl = dbvalues.get("payment.callback.url");
-	        
-	        simulator = dbvalues.get("simulator.call")	;	
 	        boolean withotp = chargeUserRequest.getWithOtp();
-	        if(simulator.equals("true")) {
-	        	 try {
-	     	        if(withotp) {
-	     	        	chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
-	     	        	saveToDB.saveRequestToDB(chargeUserRequest);
-	     	        	 String responseStr = simulatorChargeUrl(chargeUserRequest);
-	     	        	paymentResponse.setResponseCode("00");
-	     	        	paymentResponse.setChargeNowWithOtpUrl(responseStr);
-						paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
-						paymentResponse.setBillCode(chargeUserRequest.getBillCode()  );
-						paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
-	     	        }else if(withotp == false) {
-	     	        	String ccTransaction = initMandateResponseEntityRepository.findByRefNo(chargeUserRequest.getRefNumber());
-	     	        	 log.info("ccTransaction from db" +ccTransaction);
-	     	    		 long unixTime = System.currentTimeMillis();
-	     	    		 log.info("unixTime" +unixTime);
-	     	    		 ccTransaction = ccTransaction + "*" + unixTime;
-	     	    		 log.info("ccTransaction " +ccTransaction);
-	     	    		paymentResponse.setResponseCode("00");
-	     	        	paymentResponse.setCollection_status("SUCCESSFULLY_COMPLETE");	
-						
-						paymentResponse.setBillCode(chargeUserRequest.getBillCode());
-						paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
-						paymentResponse.setCcTransactionId(ccTransaction);
-
-						paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
-						
-	     	        	
-	     	        }
-	        	 }catch(Exception e) {
-	        		 log.info("Exception " +e);
-	        	 }
-	        }
-	        else if(simulator.equals("false")) {
+	        
 	        try {
 	        if(withotp) {
 	        	chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
@@ -443,7 +404,6 @@ private String ccTransactionId ;
 	        	String curlecRequestUrl = curlecPaymentService.callChargeWithOtpUrl(chargeUserRequest) ;
 				log.info("ChargeWithOtpResponse url to hit curlec" +curlecRequestUrl);
 				if(curlecRequestUrl != null) {
-					
 					paymentResponse.setChargeNowWithOtpUrl(curlecRequestUrl);
 					paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
 					paymentResponse.setBillCode(chargeUserRequest.getBillCode()  );
@@ -522,44 +482,25 @@ private String ccTransactionId ;
 	        	log.info("Callback is not null" );
 	        	
 	        }
-	        
 	        saveToDB.saveResponseToDB(paymentResponseDB);
 	        }catch(Exception e) {
 	        	paymentResponse.setErrorMsg(e.getLocalizedMessage());
 				paymentResponse.setResponseCode("01");
 	        }
-	        }
-	        
-	      //To add logs in DB
-		   PaymentLogs paymentLogs = new PaymentLogs();
-		   paymentLogs.setRequest(chargeUserRequest.toString());
-		   paymentLogs.setResponse(paymentResponse.toString());
-		   saveToDB.saveRequestToDB(paymentLogs);
-			
 	        return paymentResponse;
     }
     
     //Curlec
-    @ResponseBody
     @PostMapping(value = "/checkcollectionstatus")
 	public Object checkCollectionStatus(@RequestBody CollectionStatusRequest collectionStatusRequest) throws Exception {
 		log.info("Inside collectionStatusRequest " +collectionStatusRequest);
-		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
 		CollectionStatusResponse statusResponsedb = new CollectionStatusResponse();
+		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
 		saveToDB.saveRequestToDB(collectionStatusRequest);
 		ResponseEntity<String> response = null;
 		ObjectMapper mapper = new ObjectMapper();
 		String res;
 		log.info("Inside checkcollectionstatus " +collectionStatusRequest);
-		  HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-	        simulator = dbvalues.get("simulator.call")	;
-		if(simulator.equals("true")){
-			log.info("Inside Simulator ");
-				statusResponse.setCollection_status("SUCCESSFULLY_COMPLETE");	
-				statusResponse.setCc_transaction_id(collectionStatusRequest.getCcTransactionId());
-				statusResponse.setResponseCode("00");
-		}else if(simulator.equals("false")) {
-			log.info("Inside normal flow simulator - false ");
 		try {
 		if(collectionStatusRequest.getCcTransactionId()== null || collectionStatusRequest.getClientType() == null ) {
 			log.info("Mandatory value is empty..!! ");
@@ -584,10 +525,10 @@ private String ccTransactionId ;
 				statusResponse.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 				statusResponsedb.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 			}
-			/*if(responseJson.getJSONArray("reference_number").get(0).toString() != null) {
+			if(responseJson.getJSONArray("reference_number").get(0).toString() != null) {
 				statusResponse.setCc_transaction_id(responseJson.getJSONArray("reference_number").get(0).toString());
 				statusResponsedb.setCc_transaction_id(responseJson.getJSONArray("reference_number").get(0).toString());
-			}*/
+			}
 			}
 			
 		}
@@ -598,17 +539,11 @@ private String ccTransactionId ;
 			statusResponse.setResponseCode("01");
 			statusResponse.setErrorMsg(e.getLocalizedMessage());
 		}
-		}
-		//To add logs in DB
-		PaymentLogs paymentLogs = new PaymentLogs();
-		paymentLogs.setRequest(collectionStatusRequest.toString());
-		paymentLogs.setResponse(statusResponse.toString());
-		saveToDB.saveRequestToDB(paymentLogs);
+		
 		return statusResponse;
 	}
     
   
-    @ResponseBody
 	@RequestMapping(value = "mobicallback", method = { RequestMethod.GET, RequestMethod.POST })
 	public void processCallbackTest(@RequestParam("input") String input)
 	// @RequestParam("fpx_notes") String fpx_notes)
@@ -618,7 +553,6 @@ private String ccTransactionId ;
 		log.info("Callback : +input");
 	}
 
-    @ResponseBody
 	@PostMapping("/api/payment/callback/new-mandate")
 	//@RequestMapping(value = "//api/payment/callback/new-mandate", method = {RequestMethod.GET,RequestMethod.POST})
     public CallBackDto processCallback(@RequestParam("curlec_method") String curlec_method, @RequestParam("fpx_fpxTxnId") String fpx_fpxTxnId,
@@ -651,7 +585,7 @@ private String ccTransactionId ;
         return res;
     }
 
-    @ResponseBody
+    
     @PostMapping("/callback/mobypayCallback")
     public String MobyprocessCallback(@RequestBody MobiCallBackDto callBackDto) throws ParseException {
     	
@@ -730,90 +664,5 @@ private String ccTransactionId ;
         return result.getBody();
     }
 
-   	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest) {
-   		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-		String serverName = dbvalues.get("server.name");
-		log.info("Inside simulatorChargeUrl ");
-   		String url = serverName +  "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
-				+ chargeUserRequest.getRefNumber() + "&collectionAmount=" +chargeUserRequest.getAmount() + "&invoiceNumber="
-				+ chargeUserRequest.getBillCode() + "-" +chargeUserRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" +chargeUserRequest.getCallBackUrl() + 
-				"&redirectUrl=" +chargeUserRequest.getRedirectUrl() +"&method=chargenowOTP";
-		log.info("URL in callChargeWithOtpUrl " +url);
-		
-   		return url;
-   	}
-   	
-   	//@ResponseBody
-    @GetMapping(value = "/chargeNow")
-   	public ResponseEntity<Void> simulateCurlecCharge(@RequestParam String merchantId, @RequestParam String employeeId, @RequestParam String refNumber, @RequestParam String collectionAmount, 
-   			@RequestParam String invoiceNumber, @RequestParam String collectionCallbackUrl,
-   			@RequestParam String redirectUrl, @RequestParam String method) {
-    	log.info("Inside simulatorCharge ");
-    	String url = null;
-    	ResponseEntity<String> responseFromMerchant;
-    //	curlecPaymentService.simulateChargeCallback(callBackUrl);
-    	try {
-    	// 	getSimulatorCallback("nFk-09052022-126*1",invoiceNumber,"SUCCESSFULLY_COMPLETE",refNumber);
-    		CurlecCallback curlecCallbackResponse = new CurlecCallback();
-    		log.info("invoiceNumber "+invoiceNumber);
-    		 String ccTransaction = initMandateResponseEntityRepository.findByRefNo(refNumber);
-    		 long unixTime = System.currentTimeMillis();
-
-    		 ccTransaction = ccTransaction + "*" + unixTime;
-    		 log.info("ccTransaction " +ccTransaction);
-    	/*for(int i=0;i<9;i++) {
-    			ccTransactionId += i;
-    		}*/
-    		curlecCallbackResponse.setCcTransactionId(ccTransaction );
-       	 curlecCallbackResponse.setBillCode(invoiceNumber.split("-")[0]);
-       	 curlecCallbackResponse.setInvoiceNumber(invoiceNumber)  ;
-       	 curlecCallbackResponse.setCollectionStatus("SUCCESSFULLY_COMPLETE");
-       	 curlecCallbackResponse.setRefNumber(refNumber)  ;
-       	  
-       	 responseFromMerchant =  curlecPaymentService.callCurlecCallback(curlecCallbackResponse,merchantCallbackUrl);
-       	 log.info("responseFromMerchant " +responseFromMerchant);
-    	url = redirectUrl + "?reference_number="+refNumber +"&invoice_number=" +invoiceNumber +"&collection_status=SUCCESSFULLY_COMPLETE&cc_transaction_id="+ccTransaction;
-    	log.info("Redirect url "+redirectUrl);
-    	}catch(Exception e) {
-    		log.info("Exception in simulateCurlecCharge " +e);
-    	}
-    	
-   		return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(url)).build();
-   	}
-    
-   	
-    @ResponseBody
-    @RequestMapping(value = "/redirect", method= RequestMethod.GET)
-   	public String redirectSimulator(@RequestParam String collection_status, @RequestParam String reference_number,@RequestParam String invoice_number,@RequestParam String cc_transaction_id) {
-    	log.info("Inside redirect");
-    // 	String response = "?reference_number="+refNumber +"&invoice_number=" +invoiceNumber +"&collection_status=SUCCESSFULLY_COMPLETE&cc_transaction_id=nFk-09052022-126*1";
-    	
-    	//String url = redirectUrl + "?reference_number="+refNumber +"&invoice_number=" +invoiceNumber +"&collection_status=SUCCESSFULLY_COMPLETE&cc_transaction_id=nFk-09052022-126*1";
-		//return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(url)).build();
-    	return " ";
-    }
-    @ResponseBody
-    @RequestMapping(value = {"/callback"}, method = RequestMethod.POST)
-    public CurlecCallback getSimulatorCallback(CurlecCallback curlecCallbackResponse)
-            throws Exception {
-    	//CurlecCallback curlecCallbackResponse = new CurlecCallback();
-    	ResponseEntity<String> responseFromMerchant;
-    	 log.info("Inside getSimulatorCallback " +curlecCallbackResponse.getRefNumber() + "and  invoice number " +curlecCallbackResponse.getInvoiceNumber());
-    	/* curlecCallbackResponse.setCcTransactionId(ccTransactionId)  ;
-    	 curlecCallbackResponse.setBillCode(invoiceNumber.toString().split("-")[0]);
-    	 curlecCallbackResponse.setInvoiceNumber(invoiceNumber.toString())  ;
-    	 curlecCallbackResponse.setCollectionStatus(collectionStatus.toString())  ;
-    	 curlecCallbackResponse.setRefNumber(refNumber.toString())  ;
-    	  */
-    	// responseFromMerchant =  curlecPaymentService.callCurlecCallback(curlecCallbackResponse,merchantCallbackUrl);
-    	// log.info("responseFromMerchant " +responseFromMerchant);
-    	 return curlecCallbackResponse;
-    }
-	 
-    
-    @GetMapping(value = "/ping")
-	public String pingServer() {
-		return "Server is up";
-	}
-    
+	
 }

@@ -9,12 +9,10 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import com.mobpay.Payment.DbConfig;
 import com.mobpay.Payment.ReadProperties;
 import com.mobpay.Payment.Repository.CollectionStatusRequest;
 import com.mobpay.Payment.Repository.MobyversaMandateRequestDtoEntityRepository;
@@ -25,10 +23,10 @@ import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
-import com.mobpay.Payment.dao.Curlec_MandateResponse;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitPayment;
 import com.mobpay.Payment.dao.InitPaymentRepository;
+import com.mobpay.Payment.dao.InitResponse;
 import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.MandateStatusRequest;
 import com.mobpay.Payment.dao.MobyversaNewMandateRequestDto;
@@ -51,7 +49,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -75,7 +72,7 @@ public class CurlecPaymentService {
     MobyversaMandateRequestDtoEntityRepository mobyversaMandateRequestDtoEntityRepository;
 
     @Autowired
-	DbConfig dbconfig;
+	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
 	
     @Autowired
     SaveToDB saveToDB;
@@ -92,10 +89,10 @@ public class CurlecPaymentService {
 
 	public String callChargeWithOtpUrl(ChargeUserRequest paymentRequest) {
 		DecimalFormat df = new DecimalFormat("0.00");
+		RestTemplate restTemplate = new RestTemplate();
 		String url = "";
 		log.info("Inside callChargeWithOtpUrl");
-		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-		curlecUrl = dbvalues.get("curlec.url");
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		url = curlecUrl + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
 				+ paymentRequest.getRefNumber() + "&collectionAmount=" +paymentRequest.getAmount() + "&invoiceNumber="
 				+ paymentRequest.getBillCode() + "-" +paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" +paymentRequest.getCallBackUrl() + 
@@ -110,15 +107,14 @@ public class CurlecPaymentService {
 		boolean message = false;
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = new Date();
-		Curlec_MandateResponse initResponsedb = new Curlec_MandateResponse();
+		InitResponse initResponsedb = new InitResponse();
 		String effectiveDate = formatter.format(date);
 		String url = "";
 		String refNo = " ";
 		ResponseEntity<String> response = null;
 		InitResponseOutput initResponse = new InitResponseOutput();
 		refNo = generateRefNo(initMandate.getClientType());
-		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-		curlecUrl = dbvalues.get("curlec.url");
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo 
 					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"  
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
@@ -242,8 +238,7 @@ public class CurlecPaymentService {
 	public ResponseEntity<String> checkCurlecStatus(String ccTransactionId) {
 		String url = "";
 		ResponseEntity<String> statusResponse = null;
-		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-		curlecUrl = dbvalues.get("curlec.url");
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		
 		url = curlecUrl + "checkstatuscc";
 		log.info("Invoke curlec to check collection status :"+url);
@@ -269,8 +264,7 @@ public class CurlecPaymentService {
 	public ResponseEntity<String> callChargeNow(ChargeUserRequest paymentRequest) {
 		String url = "";
 		ResponseEntity<String> chargeNowResponse = null;
-		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
-		curlecUrl = dbvalues.get("curlec.url");
+		curlecUrl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
 		url = curlecUrl + "curlec-services?method=60";
 		
 		 HttpHeaders headers = new HttpHeaders();
@@ -536,5 +530,6 @@ public class CurlecPaymentService {
 		 return callbackResponse;
 		
 	}
-
+	
+	
 }

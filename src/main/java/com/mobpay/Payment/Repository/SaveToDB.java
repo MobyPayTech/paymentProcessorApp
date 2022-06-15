@@ -1,25 +1,18 @@
 package com.mobpay.Payment.Repository;
 
-import java.net.InetAddress;
-import java.sql.Timestamp;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mobpay.Payment.APIKeyAuthFilter;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
-import com.mobpay.Payment.dao.Curlec_MandateResponse;
 import com.mobpay.Payment.dao.InitMandate;
-import com.mobpay.Payment.dao.PaymentLogs;
+import com.mobpay.Payment.dao.InitResponse;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class SaveToDB {
 	
@@ -50,12 +43,6 @@ public class SaveToDB {
     
     @Autowired
     InitMandateResponseEntityRepository initMandateResponseEntityRepository;
-    
-    @Autowired
-    PaymentLogRepository paymentLogRepository;
-    
-    @Autowired
-	PaymentProcessorAuthRepository paymentProcessorAuthRepository;
 	  
     public void saveRequestToDB(PaymentRequest paymentRequest) {
         paymentRequest.setCreatedAt(new Date());
@@ -101,29 +88,9 @@ public class SaveToDB {
     	initMandateRequestEntityRepository.save(initMandate);
     }
     
-    public void saveResponseToDB(Curlec_MandateResponse initResponse) {
+    public void saveResponseToDB(InitResponse initResponse) {
     	initResponse.setCreatedAt(new Date());
     	initResponse.setUpdatedAt(new Date());
     	initMandateResponseEntityRepository.save(initResponse);
-    }
-    
-    public void saveRequestToDB(PaymentLogs paymentLogs) {
-    	String ipAddress = null;
-    	String clientName = null;
-    	String key = APIKeyAuthFilter.setKeyAndValue().get("headerKey");
-    	try {
-    		InetAddress inetAddress = InetAddress.getLocalHost();
-    		ipAddress = inetAddress.getHostAddress();
-    		}catch(Exception e) {
-    			log.info("Exception " +e);
-    		}
-    	log.info("key " +key);
-    	clientName = paymentProcessorAuthRepository.findClientNameFromKey(key);
-    	paymentLogs.setIp_address(ipAddress);
-    	paymentLogs.setClient_id(clientName);
-    	log.info("clientName " +clientName);
-    	Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-    	paymentLogs.setTimestamp(timestamp);  
-        paymentLogRepository.save(paymentLogs);
     }
 }
