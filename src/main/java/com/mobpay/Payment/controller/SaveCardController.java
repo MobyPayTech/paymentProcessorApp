@@ -279,7 +279,7 @@ public class SaveCardController {
 			//ResponseEntity<String> response = curlecPaymentService.callCurlecService(saveCardRequest,saveCardRequest.getMerchantId()) ;
 		}
 		
-		InitResponse initResponse = new InitResponse();
+		Curlec_MandateResponse initResponse = new Curlec_MandateResponse();
 		/*
 		//initResponse.setAmount(initPayment.getAmount());
 		initResponse.setBillCode(initPayment.getBillCode());

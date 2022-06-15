@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InitResponse {
+public class Curlec_MandateResponse {
 
 
     @Id
