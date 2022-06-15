@@ -9,7 +9,6 @@ import com.mobpay.Payment.Repository.PaymentResponseEntityRepository;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
 import com.mobpay.Payment.Service.MobiversaPaymentService;
 import com.mobpay.Payment.dao.InitMandate;
-import com.mobpay.Payment.dao.InitResponse;
 import com.mobpay.Payment.dao.MobiversaSaveCardInputPaymentRequest;
 import com.mobpay.Payment.dao.MobiversaSaveCardPaymentRequest;
 import com.mobpay.Payment.dao.MobiversaSaveCardPaymentResponse;

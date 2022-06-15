@@ -8,11 +8,14 @@ import org.springframework.stereotype.Service;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
+import com.mobpay.Payment.dao.Curlec_MandateResponse;
 import com.mobpay.Payment.dao.InitMandate;
-import com.mobpay.Payment.dao.InitResponse;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class SaveToDB {
 	
@@ -43,6 +46,7 @@ public class SaveToDB {
     
     @Autowired
     InitMandateResponseEntityRepository initMandateResponseEntityRepository;
+    
 	  
     public void saveRequestToDB(PaymentRequest paymentRequest) {
         paymentRequest.setCreatedAt(new Date());
@@ -88,7 +92,7 @@ public class SaveToDB {
     	initMandateRequestEntityRepository.save(initMandate);
     }
     
-    public void saveResponseToDB(InitResponse initResponse) {
+    public void saveResponseToDB(Curlec_MandateResponse initResponse) {
     	initResponse.setCreatedAt(new Date());
     	initResponse.setUpdatedAt(new Date());
     	initMandateResponseEntityRepository.save(initResponse);

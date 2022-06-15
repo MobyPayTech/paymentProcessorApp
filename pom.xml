@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.mobpay</groupId>
     <artifactId>Payment</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Payment</name>
@@ -156,6 +156,7 @@
     <artifactId>jasypt-spring-boot-starter</artifactId>
     <version>2.1.2</version>
 </dependency>
+
     </dependencies>
 
     <build>
