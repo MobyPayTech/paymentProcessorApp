@@ -10,7 +10,7 @@ import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
 @Repository
-public interface MobiPaymentResponseEntityRepository extends JpaRepository<MobiversaPaymentResponse, Integer > {
+public interface MobiPaymentResponseEntityRepository /*extends JpaRepository<MobiversaPaymentResponse, Integer > */ {
 	 //Optional<MobiversaPaymentResponse> findByCardReference(String cardReference);
 	
 }

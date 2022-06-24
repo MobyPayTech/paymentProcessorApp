@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface MerchantDaoEntityRepository extends JpaRepository<MerchantsDao, Integer > {
+public interface MerchantDaoEntityRepository { /* extends JpaRepository<MerchantsDao, Integer > {
 
-    Optional<MerchantsDao> findByCode(String code);
+    Optional<MerchantsDao> findByCode(String code);*/
 }

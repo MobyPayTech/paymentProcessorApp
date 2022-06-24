@@ -65,14 +65,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CurlecPaymentService {
 
-    @Autowired
-    NewMandateRequestDtoEntityRepository newMandateRequestDtoEntityRepository;
+ //   @Autowired
+   // NewMandateRequestDtoEntityRepository newMandateRequestDtoEntityRepository;
     
-    @Autowired 
-    InitPaymentRepository initPaymentRefRepository;
+ //   @Autowired 
+ //   InitPaymentRepository initPaymentRefRepository;
     
-    @Autowired
-    MobyversaMandateRequestDtoEntityRepository mobyversaMandateRequestDtoEntityRepository;
+ //   @Autowired
+  //  MobyversaMandateRequestDtoEntityRepository mobyversaMandateRequestDtoEntityRepository;
 
     @Autowired
 	DbConfig dbconfig;
@@ -292,7 +292,7 @@ public class CurlecPaymentService {
 		 return chargeNowResponse;
 	}
 
-	 public String CurlecResponse(PaymentRequest paymentRequest, String referrnecnumbers, String merchantID) throws Exception {
+/*	 public String CurlecResponse(PaymentRequest paymentRequest, String referrnecnumbers, String merchantID) throws Exception {
 	    	ReadProperties properties = new ReadProperties();
 			 Properties prop;
 	        String referrnecnumber = "";
@@ -307,20 +307,6 @@ public class CurlecPaymentService {
 	        }
 	        RestTemplate restTemplate = new RestTemplate();
 
-					  /*
-
-					  String url=  "https://go.curlec.com/new-mandate?merchantUrl="+paymentRequest.getCallBackUrl()
-							  +"&merchantCallbackUrl="+paymentRequest.getCallBackUrl()
-							  +"&effectiveDate="+paymentRequest.getEffectiveDate()
-							  +"&expiryDate=&amount="+paymentRequest.getCarddetails()
-							  +"&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C&name=" +paymentRequest.getCustomerName()
-							  +"&emailAddress=" +paymentRequest.getLoginId()
-							  +"&phoneNumber=" +paymentRequest.getMobileNo()
-							  +"&idType=NRIC&referenceNumber="+referrnecnumber
-							  +"&idValue=8002270421111&propertyOne="+paymentRequest.getOrderId()
-							  +"&linkId=Notes&merchantId="+paymentRequest.getMerchantId()
-							  +"&employeeId=197331&method=03&paymentMethod=2";
-	*/
 	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	        Date date = new Date();
 	        String effectiveDate = formatter.format(date);
@@ -365,7 +351,7 @@ public class CurlecPaymentService {
 	                 .bankId("19")
 	                // .amount(paymentRequest.getAmount())
 	                 .build();
-	         newMandateRequestDtoEntityRepository.save(newMandateRequestDto);
+	       //   newMandateRequestDtoEntityRepository.save(newMandateRequestDto);
 	      }else {
 	    	 // String carddetails=paymentRequest.getCarddetails().split("#")[0]+""
 	    	   url = "https://paydee.gomobi.io/UMEzyway/TEzywayReqDetails.jsp?mobiApiKey=" + referrnecnumber
@@ -406,24 +392,10 @@ public class CurlecPaymentService {
 	                   .merchantId(paymentRequest.getMerchantId())
 	                   .build();
 	    	   //mobyversaflag=true;
-	           mobyversaMandateRequestDtoEntityRepository.save(newMandateRequestDto);
+	      //      mobyversaMandateRequestDtoEntityRepository.save(newMandateRequestDto);
 	      }
 	        
 
-			/*
-			 * NewMandateRequestDto newMandateRequestDto = NewMandateRequestDto.builder()
-			 * .url("https://demo.curlec.com/new-mandate") .referenceNumber(referrnecnumber)
-			 * .purposeOfPayment("Loans") .phoneNumber(paymentRequest.getMobileNo())
-			 * .paymentMethod("2") .name(paymentRequest.getCustomerName()) .method("03")
-			 * .merchantUrl(paymentRequest.getCallBackUrl()) .merchantId("447300")
-			 * .merchantCallbackUrl(paymentRequest.getCallBackUrl()) .maximumFrequency("99")
-			 * .linkId("Notes") .idValue("8002270421111") .idType("NRIC")
-			 * .frequency("MONTHLY") .expiryDate("") .employeeId("44733")
-			 * .effectiveDate(effectiveDate) .createdAt(new Date()) .businessModel("B2C")
-			 * .emailAddress(paymentRequest.getLoginId()) .bankId("19")
-			 * .amount(paymentRequest.getCarddetails().split("#")[3]) .build();
-			 * newMandateRequestDtoEntityRepository.save(newMandateRequestDto);
-			 */
 	      	log.info("Invoked curlec new mandate API :"+url);
 
 	        URI uri = new URI(url);
@@ -471,16 +443,13 @@ public class CurlecPaymentService {
 	                CurlecResponse(paymentRequest, format,merchantID);
 	            }
 	            else {
-	                /*
-	                ToDo integrate Email notifier for error events
-	                 */
 	                log.error("Curlec API not responding due to "+subMessage);
 	                return null;
 	           }
 	        }
 	        return  url;
 	    }
-
+*/
 	 private void writeAPReferenceNumber(String content){
 
 	        try {

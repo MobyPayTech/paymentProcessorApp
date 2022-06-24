@@ -15,14 +15,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "payment_mandate_request")
+ @Entity
+ @Table(name = "pp_mobiversa_savecardrequest")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor 
 public class MobiversaSaveCardInputPaymentRequest {
-	@Id
+	 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private Integer id;
@@ -42,4 +42,5 @@ public class MobiversaSaveCardInputPaymentRequest {
     private Date createdAt;
     @Column(name = "UpdatedAt")
     private Date updatedAt;
+    
 }

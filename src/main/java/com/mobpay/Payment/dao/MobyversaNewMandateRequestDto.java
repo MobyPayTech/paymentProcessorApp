@@ -14,14 +14,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+/*@Data
 @Entity
-@Table(name = "mobyversa_mandate_request")
+// @Table(name = "mobyversa_mandate_request")
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class MobyversaNewMandateRequestDto {
-	 @Id
+	/* @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
 	    private Integer id;
@@ -56,5 +56,5 @@ public class MobyversaNewMandateRequestDto {
 	    private String employeeId;
 	    private String method;
 	    private String paymentMethod;
-	    private Date createdAt;
+	    private Date createdAt; */
 }

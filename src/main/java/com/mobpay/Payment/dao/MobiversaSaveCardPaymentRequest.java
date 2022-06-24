@@ -14,18 +14,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "payment_new_mandate_request")
+@Table(name = "pp_mobiversa_savecard_request")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MobiversaSaveCardPaymentRequest {
 
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	    @Column(name = "Id")
+	    private Integer id;
 	private String walletId;
     private String amount;
     private String mobileNo;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+  //  @Id
+   // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InvoiceId")
     private String invoiceId;
     private String service;

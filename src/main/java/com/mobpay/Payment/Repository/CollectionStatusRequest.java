@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Curlec_CollectionStatusRequest")
+@Table(name = "pp_curlec_collectionStatusRequest")
 @Data
 @Builder
 @NoArgsConstructor

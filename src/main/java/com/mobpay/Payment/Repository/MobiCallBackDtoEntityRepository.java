@@ -10,7 +10,7 @@ import com.mobpay.Payment.dao.MobiCallBackDto;
 import com.mobpay.Payment.dao.PaymentRequest;
 
 @Repository
-public interface MobiCallBackDtoEntityRepository extends JpaRepository<MobiCallBackDto, Integer > {
+public interface MobiCallBackDtoEntityRepository /* extends JpaRepository<MobiCallBackDto, Integer > */ {
 
 	
 

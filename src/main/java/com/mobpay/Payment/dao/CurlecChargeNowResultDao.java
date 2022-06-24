@@ -6,12 +6,12 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
-@Data
+/* @Data
 @Builder
 @Entity
-@Table(name = "curlec_chargenow_result")
+@Table(name = "curlec_chargenow_result")*/ 
 public class CurlecChargeNowResultDao {
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -22,5 +22,5 @@ public class CurlecChargeNowResultDao {
     private String dateTime;
     @Type(type="text")
     private String responsePayload;
-
+*/
 }

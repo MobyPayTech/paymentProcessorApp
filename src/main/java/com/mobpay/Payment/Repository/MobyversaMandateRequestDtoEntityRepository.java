@@ -7,7 +7,7 @@ import com.mobpay.Payment.dao.MobyversaNewMandateRequestDto;
 import com.mobpay.Payment.dao.NewMandateRequestDto;
 
 @Repository
-public interface MobyversaMandateRequestDtoEntityRepository extends JpaRepository<MobyversaNewMandateRequestDto, Integer >{
+public interface MobyversaMandateRequestDtoEntityRepository /* extends JpaRepository<MobyversaNewMandateRequestDto, Integer >*/ {
 }
 
 

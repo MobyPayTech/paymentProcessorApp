@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Curlec_MandateResponse")
+@Table(name = "pp_curlec_MandateResponse")
 @Data
 @Builder
 @NoArgsConstructor

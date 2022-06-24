@@ -10,12 +10,12 @@ import javax.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
+/*@Data
 //@Builder
 @Entity
-@Table(name = "mobi_callback_data")
+@Table(name = "mobi_callback_data")*/
 public class MobiCallBackRespositoryDAO {
-
+/*
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -51,5 +51,5 @@ public class MobiCallBackRespositoryDAO {
  @Column(name = "rrn")
     private String Rrn;
  @Column(name = "time")
-    private String Time;
+    private String Time;*/
 }

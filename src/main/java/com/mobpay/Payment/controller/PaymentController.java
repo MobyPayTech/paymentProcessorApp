@@ -85,17 +85,17 @@ public class PaymentController {
     @Autowired
     CurlecSubsequentPaymentService curlecSubsequentPaymentService;
     
-    @Autowired
-    MobiPaymentResponseEntityRepository entityRepository;
+  //   @Autowired
+  //  MobiPaymentResponseEntityRepository entityRepository;
 
-    @Autowired
-    CallBackDtoEntityRepository callBackDtoEntityRepository;
+ //   @Autowired
+ //   CallBackDtoEntityRepository callBackDtoEntityRepository;
     
     @Autowired
     PaymentRequestEntityRepository paymentrequestentityrepository;
     
-    @Autowired
-    MobiCallBackDtoEntityRepository mobiCallBackDtoEntityRepository;
+//    @Autowired
+ //   MobiCallBackDtoEntityRepository mobiCallBackDtoEntityRepository;
 
     @Autowired
     AddCardService addCardService;
@@ -356,7 +356,7 @@ private String ccTransactionId ;
 				PaymentLogs paymentLogs = new PaymentLogs();
 				paymentLogs.setRequest(initMandate.toString());
 				paymentLogs.setResponse(initResponse.toString());
-				saveToDB.saveRequestToDB(paymentLogs);
+				// saveToDB.saveRequestToDB(paymentLogs);
 		}
 		catch(InternalServerError e ) {
 			log.error("Exception in init payment" + e);
@@ -413,6 +413,13 @@ private String ccTransactionId ;
 						paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
 						paymentResponse.setBillCode(chargeUserRequest.getBillCode()  );
 						paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
+						
+						paymentResponseDB.setResponseCode("00");
+						paymentResponseDB.setChargeNowWithOtpUrl(responseStr);
+						paymentResponseDB.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo() );
+						paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
+						paymentResponseDB.setRefNumber(chargeUserRequest.getRefNumber());
+						  saveToDB.saveResponseToDB(paymentResponseDB);
 	     	        }else if(withotp == false) {
 	     	        	String ccTransaction = initMandateResponseEntityRepository.findByRefNo(chargeUserRequest.getRefNumber());
 	     	        	 log.info("ccTransaction from db" +ccTransaction);
@@ -422,13 +429,18 @@ private String ccTransactionId ;
 	     	    		 log.info("ccTransaction " +ccTransaction);
 	     	    		paymentResponse.setResponseCode("00");
 	     	        	paymentResponse.setCollection_status("SUCCESSFULLY_COMPLETE");	
-						
 						paymentResponse.setBillCode(chargeUserRequest.getBillCode());
 						paymentResponse.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
 						paymentResponse.setCcTransactionId(ccTransaction);
-
 						paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
 						
+						paymentResponseDB.setResponseCode("00");
+						paymentResponseDB.setCollection_status("SUCCESSFULLY_COMPLETE");	
+						paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
+						paymentResponseDB.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
+						paymentResponseDB.setCcTransactionId(ccTransaction);
+						paymentResponseDB.setRefNumber(chargeUserRequest.getRefNumber());
+						  saveToDB.saveResponseToDB(paymentResponseDB);
 	     	        	
 	     	        }
 	        	 }catch(Exception e) {
@@ -450,7 +462,7 @@ private String ccTransactionId ;
 					paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
 					//truncate since it is long
 					String curlecUrl = curlecRequestUrl.substring(33);
-					paymentResponseDB.setChargeNowWithOtpUrl(curlecUrl);
+					paymentResponseDB.setChargeNowWithOtpUrl(curlecRequestUrl);
 					paymentResponseDB.setInvoiceNumber(chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo() );
 					paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
 					paymentResponseDB.setRefNumber(chargeUserRequest.getRefNumber());
@@ -493,7 +505,7 @@ private String ccTransactionId ;
 					}
 					if(responseJson.get("cc_transaction_id") != null && responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
 						paymentResponse.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-						paymentResponseDB.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
+						paymentResponseDB.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 					}
 					if(responseJson.get("reference_number") != null && responseJson.getJSONArray("reference_number").get(0).toString() != null) {
 						paymentResponse.setRefNumber(responseJson.getJSONArray("reference_number").get(0).toString());
@@ -534,7 +546,7 @@ private String ccTransactionId ;
 		   PaymentLogs paymentLogs = new PaymentLogs();
 		   paymentLogs.setRequest(chargeUserRequest.toString());
 		   paymentLogs.setResponse(paymentResponse.toString());
-		   saveToDB.saveRequestToDB(paymentLogs);
+		  // saveToDB.saveRequestToDB(paymentLogs);
 			
 	        return paymentResponse;
     }
@@ -558,6 +570,11 @@ private String ccTransactionId ;
 				statusResponse.setCollection_status("SUCCESSFULLY_COMPLETE");	
 				statusResponse.setCc_transaction_id(collectionStatusRequest.getCcTransactionId());
 				statusResponse.setResponseCode("00");
+				
+				statusResponsedb.setCollection_status("SUCCESSFULLY_COMPLETE");	
+				statusResponsedb.setCc_transaction_id(collectionStatusRequest.getCcTransactionId());
+				statusResponsedb.setResponseCode("00");
+				saveToDB.saveResponseToDB(statusResponsedb);
 		}else if(simulator.equals("false")) {
 			log.info("Inside normal flow simulator - false ");
 		try {
@@ -603,7 +620,7 @@ private String ccTransactionId ;
 		PaymentLogs paymentLogs = new PaymentLogs();
 		paymentLogs.setRequest(collectionStatusRequest.toString());
 		paymentLogs.setResponse(statusResponse.toString());
-		saveToDB.saveRequestToDB(paymentLogs);
+		// saveToDB.saveRequestToDB(paymentLogs);
 		return statusResponse;
 	}
     
@@ -618,6 +635,7 @@ private String ccTransactionId ;
 		log.info("Callback : +input");
 	}
 
+    /*
     @ResponseBody
 	@PostMapping("/api/payment/callback/new-mandate")
 	//@RequestMapping(value = "//api/payment/callback/new-mandate", method = {RequestMethod.GET,RequestMethod.POST})
@@ -729,7 +747,7 @@ private String ccTransactionId ;
        }
         return result.getBody();
     }
-
+*/
    	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest) {
    		HashMap<String,String> dbvalues = dbconfig.getValueFromDB();
 		String serverName = dbvalues.get("server.name");

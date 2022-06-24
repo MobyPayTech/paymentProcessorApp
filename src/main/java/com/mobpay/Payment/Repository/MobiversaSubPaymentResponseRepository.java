@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import com.mobpay.Payment.dao.MobiversaSaveCardPaymentResponse;
 @Repository
-public interface MobiversaSubPaymentResponseRepository extends JpaRepository<MobiversaSaveCardPaymentResponse, Integer > {
+public interface MobiversaSubPaymentResponseRepository  extends JpaRepository<MobiversaSaveCardPaymentResponse, Integer >  {
 	
 }

@@ -5,12 +5,12 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-@Data
+/*@Data
 @Builder
-@Entity
-@Table(name = "subsequeut_payment_response")
+@Entity*/
+// @Table(name = "subsequeut_payment_response")
 public class SubsequentPaymentResponse {
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -20,5 +20,5 @@ public class SubsequentPaymentResponse {
     private String billCode;
     private float amount;
     private String transactionId;
-    private String dateTime;
+    private String dateTime; */
 }

@@ -10,11 +10,12 @@ import javax.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
+/*@Data
 @Builder
 @Entity
-@Table(name = "mobipay_callback_data")
-public class MobypayCallBackDto {
+//@Table(name = "mobipay_callback_data")
+*/public class MobypayCallBackDto {
+/*
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
@@ -32,4 +33,5 @@ public class MobypayCallBackDto {
 	    private String fpx_debitAuthCode;
 	    private String fpx_type;
 	    private String fpx_notes;
+	    */
 }

@@ -5,12 +5,12 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-@Data
+/*@Data
 @Builder
 @Entity
-@Table(name = "curlec_chargenow_request")
+@Table(name = "curlec_chargenow_request") */
 public class CurlecSubsequentPaymentRequest {
-    @Id
+   /*  @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private Integer id;
@@ -18,5 +18,5 @@ public class CurlecSubsequentPaymentRequest {
     private String employeeId;
     private String refNumber;
     private String invoiceNumber;
-    private double collectionAmount;
+    private double collectionAmount; */
 }

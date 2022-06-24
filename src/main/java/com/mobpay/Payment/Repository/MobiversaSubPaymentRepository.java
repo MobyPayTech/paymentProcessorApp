@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.mobpay.Payment.dao.MobiversaSaveCardInputPaymentRequest;
 
 @Repository
-public interface MobiversaSubPaymentRepository extends JpaRepository<MobiversaSaveCardInputPaymentRequest, Integer > {
+public interface MobiversaSubPaymentRepository  extends JpaRepository<MobiversaSaveCardInputPaymentRequest, Integer > {
 	
 }

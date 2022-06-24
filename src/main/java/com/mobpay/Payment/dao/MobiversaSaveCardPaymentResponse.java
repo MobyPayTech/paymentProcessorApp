@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Entity
-@Table(name = "payment_new_mandate_response")
+@Table(name = "pp_mobiversa_savecardresponse")
 @Data
 @Builder
 @AllArgsConstructor

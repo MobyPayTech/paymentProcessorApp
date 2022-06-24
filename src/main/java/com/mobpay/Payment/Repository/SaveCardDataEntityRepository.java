@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SaveCardDataEntityRepository extends JpaRepository<SaveCardData, Integer > {
+public interface SaveCardDataEntityRepository { /* extends JpaRepository<SaveCardData, Integer > {
 
     List<SaveCardData> findByCustIdAndCardRef(String custId, String cardRef);
 
     Optional<SaveCardData> findByCardRef( String cardRef);
     List<SaveCardData> findByCustId( String custId);
-
+*/
 
 }

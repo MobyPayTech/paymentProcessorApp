@@ -14,14 +14,14 @@ package com.mobpay.Payment.dao;
 	import lombok.Data;
 	import lombok.NoArgsConstructor;
 
-	@Entity
-	@Table(name = "payment_mandate_request")
+	/*@Entity
+	// @Table(name = "payment_mandate_request")
 	@Data
 	@Builder
 	@NoArgsConstructor
-	@AllArgsConstructor
+	@AllArgsConstructor*/
 	public class SaveCardRequest {
-
+/*
 		@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
@@ -72,4 +72,5 @@ package com.mobpay.Payment.dao;
 	    private double spendingLimit;
 	    @Column(name = "addRef")
 	    private String addRef;
+	    */
 }

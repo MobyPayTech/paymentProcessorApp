@@ -18,13 +18,13 @@ public class CurlecSubsequentPaymentService {
     @Autowired
     RestTemplate restTemplate;
 
-    @Autowired
-    CurlecSubsequentPaymentRequestEntityRepository curlecSubsequentPaymentRequestEntityRepository;
+  //  @Autowired
+ //   CurlecSubsequentPaymentRequestEntityRepository curlecSubsequentPaymentRequestEntityRepository;
 
-    @Autowired
-    CurlecChargeNowResultDaoEntityRepository curlecChargeNowResultDaoEntityRepository;
+  //  @Autowired
+   // CurlecChargeNowResultDaoEntityRepository curlecChargeNowResultDaoEntityRepository;
 
-    public SubsequentPaymentResponse makeSubsequentPayment(SubsequentPaymentRequest subsequentPaymentRequest) {
+    /*   public SubsequentPaymentResponse makeSubsequentPayment(SubsequentPaymentRequest subsequentPaymentRequest) {
 
         CurlecSubsequentPaymentRequest curlecSubsequentPaymentRequest = CurlecSubsequentPaymentRequest.builder()
                 .merchantId("447300")
@@ -52,7 +52,7 @@ public class CurlecSubsequentPaymentService {
         return parseToCurlecSubsequentResponse(response.getBody(),subsequentPaymentRequest);
     }
 
-    private SubsequentPaymentResponse parseToCurlecSubsequentResponse(CurlecSubsequentSuccessBody curlecSubsequentSuccessBody,
+   private SubsequentPaymentResponse parseToCurlecSubsequentResponse(CurlecSubsequentSuccessBody curlecSubsequentSuccessBody,
                                                                       SubsequentPaymentRequest subsequentPaymentRequest) {
 
 
@@ -84,10 +84,6 @@ public class CurlecSubsequentPaymentService {
             curlecChargeNowResultDaoEntityRepository.save(curlecChargeNowResultDao);
         } else {
 
-             /*
-                ToDo integrate Email notifier for error events
-                 */
-
             String description = curlecSubsequentSuccessBody.getMessage().get(0);
             subsequentPaymentResponse = SubsequentPaymentResponse.builder()
                     .responseCode("01")
@@ -107,5 +103,5 @@ public class CurlecSubsequentPaymentService {
 
         return subsequentPaymentResponse;
 
-    }
+    }*/
 }

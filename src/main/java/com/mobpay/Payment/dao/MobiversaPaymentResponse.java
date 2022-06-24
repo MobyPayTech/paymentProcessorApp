@@ -15,13 +15,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+/*@Entity
 @Table(name = "Mobipayment_mandate_response")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class MobiversaPaymentResponse {
+	/*
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
@@ -48,5 +49,5 @@ public class MobiversaPaymentResponse {
  private String currency;
  private String mercMdr;
  private String countryCode;
- 
+ */
 }

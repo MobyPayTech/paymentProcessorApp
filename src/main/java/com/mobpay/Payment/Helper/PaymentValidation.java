@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Component
 public class PaymentValidation {
-
+	/*
     @Autowired
     MerchantDaoEntityRepository merchantDaoEntityRepository;
 
@@ -77,13 +77,13 @@ public class PaymentValidation {
         } catch (Exception e) {
             throw new ValidationException("Amount is invalid");
         }
-*/
+
         if (amount < 2) {
             throw new ValidationException("Amount should be greater than or equal to two");
         }
 
     }
-
+/*
     public void validateCardReference(String cardRef) {
         Optional<SaveCardData> saveCardData = saveCardDataEntityRepository.findByCardRef(cardRef);
 
@@ -98,6 +98,6 @@ public class PaymentValidation {
         if (saveCardData.isEmpty()) {
             throw new ValidationException("Customer ID doesn't exist");
         }
-    }
+    }*/
 }
 

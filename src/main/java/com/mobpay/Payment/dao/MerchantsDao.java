@@ -7,15 +7,16 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
-@Entity
+
+/*@Entity
 @Table(name = "merchants")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class MerchantsDao {
 
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -40,5 +41,5 @@ public class MerchantsDao {
     @Column(name = "merchant_rate_id_6")
     private Integer merchantRateId6;
     @Column(name = "parent_id")
-    private Integer parentId;
+    private Integer parentId;*/
 }

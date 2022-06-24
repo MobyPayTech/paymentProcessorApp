@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SubsequentPaymentRequestEntityRepository extends JpaRepository<SubsequentPaymentRequest, Integer > {
+public interface SubsequentPaymentRequestEntityRepository /* extends JpaRepository<SubsequentPaymentRequest, Integer > */ {
 }

@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "save_card_data")
+/*@Entity
+ // @Table(name = "save_card_data")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class SaveCardData {
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -32,6 +32,6 @@ public class SaveCardData {
     private Date deletedDate;
     private Date suspendDate;
     private String cardStatus;
-
+*/
 
 }

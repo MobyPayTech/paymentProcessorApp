@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 //public class InitPaymentRepository {
 
 	@Repository
-	public interface InitPaymentRepository extends JpaRepository<NewMandateRequestDto, Integer > {
+	public interface InitPaymentRepository {/*extends  JpaRepository<NewMandateRequestDto, Integer > {
 
-		NewMandateRequestDto findByReferenceNumber(String referenceNumber);
+		NewMandateRequestDto findByReferenceNumber(String referenceNumber);*/
 	}
 	
 //}

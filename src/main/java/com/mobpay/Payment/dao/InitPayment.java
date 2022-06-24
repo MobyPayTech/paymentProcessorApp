@@ -17,14 +17,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "payment_new_mandate_request")
+/*@Entity
+@Table(name = "pp_new_mandate_request")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class InitPayment {
-
+/*
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -75,5 +75,5 @@ public class InitPayment {
     private Double amount;
     @Column(name = "SpendingLimit")
     private double spendingLimit;
-
+*/
 }

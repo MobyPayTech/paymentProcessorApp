@@ -7,7 +7,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mobpay.Payment.APIKeyAuthFilter;
+// import com.mobpay.Payment.APIKeyAuthFilter;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
@@ -107,7 +107,7 @@ public class SaveToDB {
     	initMandateResponseEntityRepository.save(initResponse);
     }
     
-    public void saveRequestToDB(PaymentLogs paymentLogs) {
+   /* public void saveRequestToDB(PaymentLogs paymentLogs) {
     	String ipAddress = null;
     	String clientName = null;
     	String key = APIKeyAuthFilter.setKeyAndValue().get("headerKey");
@@ -125,5 +125,5 @@ public class SaveToDB {
     	Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     	paymentLogs.setTimestamp(timestamp);  
         paymentLogRepository.save(paymentLogs);
-    }
+    }*/
 }

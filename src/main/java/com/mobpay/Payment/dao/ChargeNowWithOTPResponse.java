@@ -12,14 +12,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+/*@Entity
 @Table(name = "payment_mandate_response")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor */
 public class ChargeNowWithOTPResponse {
-
+/*
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
@@ -29,5 +29,5 @@ public class ChargeNowWithOTPResponse {
 	    private String merchantId ;
 	    private Double amount;
 	    private String responseDesc;
-	    private String billCode;   
+	    private String billCode;   */
 }

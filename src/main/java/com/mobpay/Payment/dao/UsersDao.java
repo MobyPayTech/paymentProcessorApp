@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "users")
+/*@Entity
+// @Table(name = "users")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class UsersDao {
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -49,4 +49,5 @@ public class UsersDao {
     private boolean isSuspended;
     private String remark;
     private String status;
+    */
 }

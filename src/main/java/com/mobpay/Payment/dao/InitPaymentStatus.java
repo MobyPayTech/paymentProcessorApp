@@ -13,18 +13,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "payment_new_mandate_request")
+/*@Entity
+//@Table(name = "pp_new_mandate_request")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class InitPaymentStatus {
 
 
 	
   /*  @Column(name = "Id")
     private Integer id;*/
+	/*
     @Column(name = "ServiceName")
     private String serviceName;
     @Column(name = "BillCode")
@@ -43,4 +44,5 @@ public class InitPaymentStatus {
     private int hostType;
     @Column(name = "clientType")
     private int clientType;
+    */
 }

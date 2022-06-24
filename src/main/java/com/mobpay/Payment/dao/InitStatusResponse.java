@@ -12,15 +12,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+/*@Entity
 @Table(name = "payment_new_mandate_request")
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class InitStatusResponse {
 	
-	 	@Id
+	 /*	@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
 	    private Integer id;
@@ -37,5 +37,5 @@ public class InitStatusResponse {
 	 	private String paymentResCode;
 	 	private String tokenId;
 	 	private String cardBrand;
-	 	private String cardType;
+	 	private String cardType; */
 }

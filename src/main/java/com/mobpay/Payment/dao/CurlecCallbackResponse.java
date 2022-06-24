@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Payment_callback")
+@Table(name = "pp_callback")
 @Data
 @Builder
 @NoArgsConstructor

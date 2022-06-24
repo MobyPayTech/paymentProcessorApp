@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Curlec_ChargeUserResponse")
+@Table(name = "pp_curlec_chargeUserResponse")
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,12 +26,12 @@ public class ChargeUserResponse {
 	    @GeneratedValue(strategy = GenerationType.AUTO)
 	    @Column(name = "Id")
 	    private Integer id;
-	 @Column(name = "chargeNowWithOtpUrl")
+	 	@Column(name = "chargeNowWithOtpUrl")
 	    private String chargeNowWithOtpUrl;
-	   private String responseMessage;
-	   private String responseCode;
+	 	private String responseMessage;
+	 	private String responseCode;
 	   
-	   @Column(name = "collection_status")
+	 	@Column(name = "collection_status")
 		private String collection_status;
 		@Column(name = "method")
 		private String method;
@@ -39,8 +39,8 @@ public class ChargeUserResponse {
 		private String billCode;
 		@Column(name = "invoiceNumber")
 		private String invoiceNumber;
-		@Column(name = "cc_transaction_id")
-		private String cc_transaction_id;
+		@Column(name = "ccTransactionId")
+		private String ccTransactionId;
 		@Column(name = "refNumber")
 		private String refNumber;
 		@Column(name = "CreatedAt")

@@ -35,7 +35,7 @@ import java.util.Date;
 @RestController
 @Slf4j
 public class SubsequentPaymentController {
-
+	 /*
     @Autowired
     CurlecSubsequentPaymentService curlecSubsequentPaymentService;
 
@@ -48,16 +48,7 @@ public class SubsequentPaymentController {
     @Autowired
     PaymentValidation paymentValidation;
     
-    @Autowired
-    MobiversaPaymentService mobiversaService;
-    
-    @Autowired
-    MobiversaSubPaymentRepository subPaymentRepository;
-    
-    @Autowired
-    MobiversaSubPaymentResponseRepository subPaymentResponseRepository;
-    
-    
+   
     @PostMapping("api/payment/subpayment")
     public SubsequentPaymentResponse makeSubsequentPayment(@Valid @RequestBody SubsequentPaymentRequest subsequentPaymentRequest) {
 
@@ -100,8 +91,8 @@ public class SubsequentPaymentController {
         subsequentPaymentResponse.setId(null);
         return subsequentPaymentResponse;
     }
-
-    private void saveRequestToDB(PaymentRequest paymentRequest) {
+    
+      private void saveRequestToDB(PaymentRequest paymentRequest) {
         paymentRequest.setCreatedAt(new Date());
         paymentRequest.setUpdatedAt(new Date());
         paymentrequestentityrepository.save(paymentRequest);
@@ -115,6 +106,21 @@ public class SubsequentPaymentController {
     }
     
     
+    
+*/
+	
+	 @Autowired
+	    MobiversaPaymentService mobiversaService;
+	 
+	   
+	    @Autowired
+	    MobiversaSubPaymentRepository subPaymentRepository;
+	 
+	    @Autowired
+	    MobiversaSubPaymentResponseRepository subPaymentResponseRepository;
+	    
+	   
+  
     private void saveRequestToDB(MobiversaSaveCardInputPaymentRequest paymentRequest) {
         paymentRequest.setCreatedAt(new Date());
         paymentRequest.setUpdatedAt(new Date());

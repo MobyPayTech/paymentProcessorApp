@@ -14,7 +14,7 @@ import java.util.Objects;
 @Slf4j
 public class AddCardService {
 
-    @Autowired
+	/*   @Autowired
     SaveCardDataEntityRepository saveCardDataEntityRepository;
 
 
@@ -43,5 +43,5 @@ public class AddCardService {
 
         return false;
     }
-
+*/
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "PaymentAPI3_Response")
+@Table(name = "pp_mobiversa_paymentresponse")
 @Data
 @Builder
 @NoArgsConstructor

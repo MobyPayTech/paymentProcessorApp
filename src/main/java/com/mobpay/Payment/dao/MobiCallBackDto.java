@@ -10,14 +10,15 @@ import javax.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
 
+/*
 @Data
 @Builder
-@Entity
-@Table(name = "mobi_callback_data")
+@Entity*/
+//@Table(name = "mobi_callback_data")
 public class MobiCallBackDto {
 	
 	
-	
+	/*
 	@Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    @Column(name = "Id")
@@ -63,5 +64,6 @@ public class MobiCallBackDto {
 	 @Column(name = "mercMdr") 
 	 private String MercMdr;
 	 @Column(name = "countryCode") 
-	 private String CountryCode;
+	 private String CountryCode; 
+	 */
 }

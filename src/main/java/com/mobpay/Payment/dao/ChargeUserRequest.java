@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Curlec_ChargeUserRequest")
+@Table(name = "pp_curlec_chargeUserRequest")
 @Data
 @Builder
 @NoArgsConstructor

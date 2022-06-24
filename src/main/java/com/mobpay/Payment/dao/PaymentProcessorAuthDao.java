@@ -33,9 +33,9 @@ public class PaymentProcessorAuthDao {
 	    @Column(name = "createdDate")
 	    private Date createdDate;
 	    @Column(name = "lastUsedDate")
-	    private String lastUsedDate;
+	    private Date lastUsedDate;
 	    @Column(name = "updatedDate")
-	    private String updatedDate;
+	    private Date updatedDate;
 }
 
 

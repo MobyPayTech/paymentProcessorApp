@@ -12,13 +12,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+/*@Entity
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class VGSInput {
-		
+	/*	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -30,5 +30,6 @@ public class VGSInput {
 	private String  card_number;
 	private String  card_cvc;
 	private String  card_exp;
+	*/
 	
 }

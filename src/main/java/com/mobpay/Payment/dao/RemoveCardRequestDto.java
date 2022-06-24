@@ -7,12 +7,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Data
+/*@Data
 @Builder
-@Entity
-@Table(name = "remove_card_request")
+@Entity*/
+// @Table(name = "remove_card_request")
 public class RemoveCardRequestDto {
-
+/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -31,5 +31,5 @@ public class RemoveCardRequestDto {
     private Date updatedAt;
 
     @Column(name = "clientType")
-    private String clientType;
+    private String clientType; */
 }

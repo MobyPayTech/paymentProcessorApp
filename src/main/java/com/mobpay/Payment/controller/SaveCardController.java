@@ -29,8 +29,8 @@ import java.util.List;
 @RestController
 public class SaveCardController {
 
-    @Autowired
-    SaveCardDataEntityRepository saveCardDataEntityRepository;
+  //  @Autowired
+   // SaveCardDataEntityRepository saveCardDataEntityRepository;
 
     @Autowired
     AddCardService addCardService;
@@ -44,8 +44,8 @@ public class SaveCardController {
     @Autowired
     PaymentRequestEntityRepository paymentrequestentityrepository;
 
-    @Autowired
-    RemoveCardRequestDtoEntityRepository removeCardRequestDtoEntityRepository;
+ //   @Autowired
+  //  RemoveCardRequestDtoEntityRepository removeCardRequestDtoEntityRepository;
 
     @Autowired
     CurlecPaymentService curlecPaymentService;
@@ -56,6 +56,7 @@ public class SaveCardController {
     @Autowired
     SHA sha;
 
+    /*
     @RequestMapping(value = "/api/payment/addcard", method = RequestMethod.GET)
     public ModelAndView addCard(@RequestParam(value = "serviceName") String serviceName,
                                 @RequestParam(value = "loginId") String loginId, @RequestParam(value = "mobileNo") String mobileNo,
@@ -188,6 +189,7 @@ public class SaveCardController {
         return new ModelAndView("redirect:" + redirectUrl);
 
     }
+   
 
     private void saveRequestToDB(PaymentRequest paymentRequest) {
         paymentRequest.setServiceName(paymentRequest.getServiceName());
@@ -290,6 +292,7 @@ public class SaveCardController {
 		initResponse.setResponseMessage("SUCCESS");
 		initResponse.setTxnID("DAA-22-89");
 		*/
-		return initResponse;
-	}
+	//	return initResponse;
+	//}
+
 }

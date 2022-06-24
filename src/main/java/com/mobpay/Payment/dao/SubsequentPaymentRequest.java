@@ -6,11 +6,12 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@Data
+/*@Data
 @Builder
 @Entity
-@Table(name = "subsequeut_payment_request")
-public class SubsequentPaymentRequest {
+// @Table(name = "subsequeut_payment_request")
+*/public class SubsequentPaymentRequest {
+	/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -36,4 +37,5 @@ public class SubsequentPaymentRequest {
 
     @Column(name = "clientType")
     private int clientType;
+    */
 }

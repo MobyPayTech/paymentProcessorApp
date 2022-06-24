@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "curlec_payment")
+@Table(name = "pp_mobiversa_paymentrequest")
 @Data
 @Builder
 @NoArgsConstructor

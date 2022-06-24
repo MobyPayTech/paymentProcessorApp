@@ -5,12 +5,12 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-@Data
+/*@Data
 @Builder
 @Entity
-@Table(name = "curlec_callback_data")
+@Table(name = "curlec_callback_data")*/
 public class CallBackDto {
-    @Id
+  /*  @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private Integer id;
@@ -26,5 +26,5 @@ public class CallBackDto {
     private String fpx_buyerBankId;
     private String fpx_debitAuthCode;
     private String fpx_type;
-    private String fpx_notes;
+    private String fpx_notes; */
 }

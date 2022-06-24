@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RemoveCardRequestDtoEntityRepository extends JpaRepository<RemoveCardRequestDto, Integer > {
+public interface RemoveCardRequestDtoEntityRepository /* extends JpaRepository<RemoveCardRequestDto, Integer > */{
 }

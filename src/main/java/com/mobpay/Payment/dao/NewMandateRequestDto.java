@@ -9,14 +9,14 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.util.Date;
 
-@Data
+/*@Data
 @Entity
-@Table(name = "payment_new_mandate_request")
+// @Table(name = "payment_new_mandate_request")
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor*/
 public class NewMandateRequestDto {
-
+	/*
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -46,5 +46,5 @@ public class NewMandateRequestDto {
     private String paymentMethod;
     private Date createdAt;
     private String billCode; 
-    private String transactionId; 
+    private String transactionId; */
 }
