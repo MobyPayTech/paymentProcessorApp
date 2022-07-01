@@ -8,7 +8,7 @@ import com.mobpay.Payment.Repository.PaymentResponseEntityRepository;
 import com.mobpay.Payment.Repository.RemoveCardRequestDtoEntityRepository;
 import com.mobpay.Payment.Repository.SaveCardDataEntityRepository;
 import com.mobpay.Payment.Service.AddCardService;
-import com.mobpay.Payment.Service.CurlecPaymentService;
+import com.mobpay.Payment.Service.CurlecPaymentServiceImpl;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
 import com.mobpay.Payment.dao.*;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class SaveCardController {
   //  RemoveCardRequestDtoEntityRepository removeCardRequestDtoEntityRepository;
 
     @Autowired
-    CurlecPaymentService curlecPaymentService;
+    CurlecPaymentServiceImpl curlecPaymentService;
 
     @Autowired
     PaymentValidation paymentValidation;

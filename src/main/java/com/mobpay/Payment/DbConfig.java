@@ -29,8 +29,6 @@ public class DbConfig {
 		for (int i=0 ;i<configValues.size(); i++) {
 			dbValuesMap.put(configValues.get(i).getName(),configValues.get(i).getValue());
 		}
-		String curlecurl = paymentProcessorConfigRepository.findValueFromName("curlec.url");
-		log.info("curlec.url " +curlecurl);
 		log.info("dbValuesMap " +dbValuesMap);
 		
 		//dbValuesMap.put("aws.s3.bucket" ,creditScoreConfigRepository.findValueFromName("aws.s3.bucket"));

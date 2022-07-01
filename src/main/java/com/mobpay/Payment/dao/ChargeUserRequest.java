@@ -23,8 +23,10 @@ public class ChargeUserRequest {
     private Integer id;
     @Column(name = "amount")
     private float amount;
+    @Lob
     @Column(name = "CallBackURL")
     private String callBackUrl;
+    @Lob
     @Column(name = "redirectUrl")
     private String redirectUrl;
     @Column(name = "BillCode")

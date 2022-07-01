@@ -6,5 +6,8 @@ import org.springframework.stereotype.Repository;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 
 @Repository
-public interface ChargeUserRequestEntityRepository extends JpaRepository<ChargeUserRequest, Integer > {
+public interface ChargeUserRequestEntityRepository extends JpaRepository<ChargeUserRequest, Integer> {
+
+	ChargeUserRequest findByrefNumberAndBillCode(String refNumber, String billCode);
+
 }

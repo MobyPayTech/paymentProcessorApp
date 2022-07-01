@@ -13,10 +13,11 @@ import lombok.NoArgsConstructor;
 public class CurlecCallback {
 
 		  
-	  String refNumber;
-	  String billCode;
-	  String invoiceNumber;
-	  String ccTransactionId;
-	  String collectionStatus;
+	  private String refNumber;
+	  private String billCode;
+	  private String invoiceNumber;
+	  private String ccTransactionId;
+	  private String collectionStatus;
+	  private String callBackURL;
 }
 
