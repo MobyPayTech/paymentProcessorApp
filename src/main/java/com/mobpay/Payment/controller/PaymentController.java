@@ -398,7 +398,7 @@ public class PaymentController {
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		paymentCallBackUrl = dbvalues.get("payment.callback.url");
 		log.debug("merchantCallbackUrl " + chargeUserRequest.getCallBackUrl());
-		chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
+//		chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 		log.debug("chargeUserRequest after setting payment callback url " + chargeUserRequest);
 		log.info("WithOtp " + chargeUserRequest.getWithOtp());
 
@@ -409,9 +409,9 @@ public class PaymentController {
 		if (simulator.equals("true")) {
 			try {
 				if (withotp) {
-					chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 					saveToDB.saveRequestToDB(chargeUserRequest);
-					String responseStr = simulatorChargeUrl(chargeUserRequest);
+//					chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
+					String responseStr = simulatorChargeUrl(chargeUserRequest,paymentCallBackUrl);
 					paymentResponse.setResponseCode("00");
 					paymentResponse.setChargeNowWithOtpUrl(responseStr);
 					paymentResponse.setInvoiceNumber(
@@ -458,9 +458,9 @@ public class PaymentController {
 		} else if (simulator.equals("false")) {
 			try {
 				if (withotp) {
-					chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 					saveToDB.saveRequestToDB(chargeUserRequest);
-					String curlecRequestUrl = curlecPaymentService.callChargeWithOtpUrl(chargeUserRequest);
+//					chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
+					String curlecRequestUrl = curlecPaymentService.callChargeWithOtpUrl(chargeUserRequest,paymentCallBackUrl);
 					log.info("ChargeWithOtpResponse url to hit curlec" + curlecRequestUrl);
 					if (curlecRequestUrl != null) {
 
@@ -775,14 +775,14 @@ public class PaymentController {
 	 * mobipaymentResponse.put("responseMessage", "Insufficient Funds"); } return
 	 * result.getBody(); }
 	 */
-	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest) {
+	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest, String callBackUrl) {
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		String serverName = dbvalues.get("server.name");
 		log.info("Inside simulatorChargeUrl ");
 		String url = serverName + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
 				+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
 				+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
-				+ "&collectionCallbackUrl=" + chargeUserRequest.getCallBackUrl() + "&redirectUrl="
+				+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
 				+ chargeUserRequest.getRedirectUrl() + "&method=chargenowOTP";
 		log.info("URL in callChargeWithOtpUrl " + url);
 

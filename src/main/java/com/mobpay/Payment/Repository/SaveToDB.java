@@ -66,7 +66,7 @@ public class SaveToDB {
     public void saveRequestToDB(ChargeUserRequest chargeUserRequest) {
     	chargeUserRequest.setCreatedAt(new Date());
     	chargeUserRequest.setUpdatedAt(new Date());
-        chargeUserRequestEntityRepository.save(chargeUserRequest);
+        chargeUserRequestEntityRepository.saveAndFlush(chargeUserRequest);
     }
     
     public void saveResponseToDB(ChargeUserResponse paymentResponse) {

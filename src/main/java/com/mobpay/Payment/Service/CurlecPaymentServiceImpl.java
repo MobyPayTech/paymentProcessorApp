@@ -87,7 +87,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 	static RestTemplate restTemplate = new RestTemplate();
 	ResponseEntity<String> result = null;
 
-	public String callChargeWithOtpUrl(ChargeUserRequest paymentRequest) {
+	public String callChargeWithOtpUrl(ChargeUserRequest paymentRequest, String callBackUrl) {
 		DecimalFormat df = new DecimalFormat("0.00");
 		String url = "";
 		log.info("Inside callChargeWithOtpUrl");
@@ -96,16 +96,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID) + "&employeeId="
 				+ dbvalues.get(GlobalConstants.CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
 				+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
-				+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl="
-				+ paymentRequest.getCallBackUrl() + "&redirectUrl=" + paymentRequest.getRedirectUrl()
-				+ "&method=chargenowOTP";
+				+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
+				+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
 		log.info("URL in callChargeWithOtpUrl " + url);
 		return url;
 	}
 
 	public InitResponseOutput callCurlecNewMandateService(InitMandate initMandate)
 			throws URISyntaxException, ParseException, JSONException, IOException {
-
 		RestTemplate restTemplate = new RestTemplate();
 		boolean message = false;
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -175,7 +173,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				initResponse.setErrorMsg(e.getLocalizedMessage());
 			}
 		}
-		initResponsedb.setMerchantId("5354721");
+		initResponsedb.setMerchantId(dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
 		initResponsedb.setResponseCode("00");
 		saveToDB.saveResponseToDB(initResponsedb);
 		return initResponse;
@@ -251,7 +249,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("ccTransactionId", ccTransactionId);
-		map.add("merchantId", "5354721");
+		map.add("merchantId", dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
@@ -458,8 +456,9 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 	@Override
 	public String getCurlecCallbackUrl(CurlecCallback curlecCallbackReq) {
 		if (curlecCallbackReq != null && !ObjectUtils.isEmpty(curlecCallbackReq)) {
+			String uniqueRequestNo = curlecCallbackReq.getInvoiceNumber().split("-")[1];
 			ChargeUserRequest callbackUrl = chargeUserRequestEntityRepository
-					.findByrefNumberAndBillCode(curlecCallbackReq.getRefNumber(), curlecCallbackReq.getBillCode());
+					.findByrefNumberAndBillCodeAndUniqueRequestNo(curlecCallbackReq.getRefNumber(), curlecCallbackReq.getBillCode(),uniqueRequestNo);
 			if (callbackUrl != null && StringUtils.isNotBlank(callbackUrl.getCallBackUrl())) {
 				return callbackUrl.getCallBackUrl();
 

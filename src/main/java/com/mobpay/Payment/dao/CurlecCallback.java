@@ -18,6 +18,5 @@ public class CurlecCallback {
 	  private String invoiceNumber;
 	  private String ccTransactionId;
 	  private String collectionStatus;
-	  private String callBackURL;
 }
 

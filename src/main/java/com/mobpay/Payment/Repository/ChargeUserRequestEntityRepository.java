@@ -8,6 +8,6 @@ import com.mobpay.Payment.dao.ChargeUserRequest;
 @Repository
 public interface ChargeUserRequestEntityRepository extends JpaRepository<ChargeUserRequest, Integer> {
 
-	ChargeUserRequest findByrefNumberAndBillCode(String refNumber, String billCode);
+	ChargeUserRequest findByrefNumberAndBillCodeAndUniqueRequestNo(String refNumber, String billCode, String uniqueRequestNo);
 
 }
