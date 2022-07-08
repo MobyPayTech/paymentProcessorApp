@@ -18,6 +18,7 @@ import com.mobpay.Payment.Service.AddCardService;
 import com.mobpay.Payment.Service.CurlecPaymentService;
 import com.mobpay.Payment.Service.CurlecPaymentServiceImpl;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
+import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.Service.MobiversaPaymentService;
 import com.mobpay.Payment.dao.CallBackDto;
 import com.mobpay.Payment.dao.ChargeUserRequest;
@@ -396,15 +397,15 @@ public class PaymentController {
 		log.info("chargeUserRequest " + chargeUserRequest);
 //		merchantCallbackUrl = chargeUserRequest.getCallBackUrl();
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		paymentCallBackUrl = dbvalues.get("payment.callback.url");
+		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
 		log.debug("merchantCallbackUrl " + chargeUserRequest.getCallBackUrl());
 //		chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 		log.debug("chargeUserRequest after setting payment callback url " + chargeUserRequest);
 		log.info("WithOtp " + chargeUserRequest.getWithOtp());
 
-		paymentCallBackUrl = dbvalues.get("payment.callback.url");
+		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
 
-		simulator = dbvalues.get("simulator.call");
+		simulator = dbvalues.get(GlobalConstants.SIMULATOR_CALL);
 		boolean withotp = chargeUserRequest.getWithOtp();
 		if (simulator.equals("true")) {
 			try {
@@ -587,7 +588,7 @@ public class PaymentController {
 		String res;
 		log.info("Inside checkcollectionstatus " + collectionStatusRequest);
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		simulator = dbvalues.get("simulator.call");
+		simulator = dbvalues.get(GlobalConstants.SIMULATOR_CALL);
 		if (simulator.equals("true")) {
 			log.info("Inside Simulator ");
 			statusResponse.setCollection_status("SUCCESSFULLY_COMPLETE");
@@ -777,9 +778,9 @@ public class PaymentController {
 	 */
 	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest, String callBackUrl) {
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		String serverName = dbvalues.get("server.name");
+		String serverName = dbvalues.get(GlobalConstants.SERVER_NAME);
 		log.info("Inside simulatorChargeUrl ");
-		String url = serverName + "chargeNow?merchantId=5354721&employeeId=536358&refNumber="
+		String url = serverName + "chargeNow?merchantId="+ dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID) +"&employeeId="+ dbvalues.get(GlobalConstants.CURLEC_EMP_ID) +"&refNumber="
 				+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
 				+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
 				+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
