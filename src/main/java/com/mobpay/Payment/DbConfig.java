@@ -23,13 +23,9 @@ public class DbConfig {
 	public HashMap<String,String> getValueFromDB() {
 		HashMap<String,String> dbValuesMap = new HashMap<String,String>();
 		List<PaymentProcessorsysconfig> configValues = paymentProcessorConfigRepository.findAll();
-		log.info("configValues " +configValues);
-		log.info("configValues 1" +configValues.get(0).getName());
-		log.info("Size " +configValues.size());
 		for (int i=0 ;i<configValues.size(); i++) {
 			dbValuesMap.put(configValues.get(i).getName(),configValues.get(i).getValue());
 		}
-		log.info("dbValuesMap " +dbValuesMap);
 		
 		//dbValuesMap.put("aws.s3.bucket" ,creditScoreConfigRepository.findValueFromName("aws.s3.bucket"));
 		
