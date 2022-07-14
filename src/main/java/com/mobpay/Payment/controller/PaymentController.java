@@ -364,7 +364,7 @@ public class PaymentController {
 			PaymentLogs paymentLogs = new PaymentLogs();
 			paymentLogs.setRequest(initMandate.toString());
 			paymentLogs.setResponse(initResponse.toString());
-			// saveToDB.saveRequestToDB(paymentLogs);
+			 saveToDB.saveRequestToDB(paymentLogs);
 		} catch (InternalServerError e) {
 			log.error("Exception in init payment" + e);
 			initResponse.setResponseCode("01");
@@ -570,7 +570,7 @@ public class PaymentController {
 		PaymentLogs paymentLogs = new PaymentLogs();
 		paymentLogs.setRequest(chargeUserRequest.toString());
 		paymentLogs.setResponse(paymentResponse.toString());
-		// saveToDB.saveRequestToDB(paymentLogs);
+		 saveToDB.saveRequestToDB(paymentLogs);
 
 		return paymentResponse;
 	}
@@ -651,7 +651,7 @@ public class PaymentController {
 		PaymentLogs paymentLogs = new PaymentLogs();
 		paymentLogs.setRequest(collectionStatusRequest.toString());
 		paymentLogs.setResponse(statusResponse.toString());
-		// saveToDB.saveRequestToDB(paymentLogs);
+		 saveToDB.saveRequestToDB(paymentLogs);
 		return statusResponse;
 	}
 
