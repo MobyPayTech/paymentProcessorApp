@@ -93,11 +93,19 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		log.info("Inside callChargeWithOtpUrl");
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
-		url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID) + "&employeeId="
-				+ dbvalues.get(GlobalConstants.CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
+		if(paymentRequest.getClientType() == 1) {
+		url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID) + "&employeeId="
+				+ dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
 				+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
 				+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
 				+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
+		}else if(paymentRequest.getClientType() == 2) {
+			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID) + "&employeeId="
+					+ dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
+					+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
+					+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
+					+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
+		}
 		log.info("URL in callChargeWithOtpUrl " + url);
 		return url;
 	}
@@ -117,13 +125,23 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		refNo = generateRefNo(initMandate.getClientType());
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
+		if(initMandate.getClientType() == 1 ) {
 		url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo + "&effectiveDate=" + effectiveDate
 				+ "&expiryDate=&amount=30000.00"
 				+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 				+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
 				+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
-				+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID) + "&employeeId="
-				+ dbvalues.get(GlobalConstants.CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+				+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID) + "&employeeId="
+				+ dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+		}else if(initMandate.getClientType() == 2) {
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo + "&effectiveDate=" + effectiveDate
+					+ "&expiryDate=&amount=30000.00"
+					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
+					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
+					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
+					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID) + "&employeeId="
+					+ dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+		}
 
 		log.info("Invoke curlec new mandate API :" + url);
 
@@ -135,7 +153,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			log.info("Curlec response :" + result);
 
 			if (response != null && response.getStatusCodeValue() == 200) {
-				initResponse.setMerchantId(dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
+				initResponse.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
 				initResponse.setResponseCode("00");
 
 				String body = response.getBody();
@@ -173,7 +191,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				initResponse.setErrorMsg(e.getLocalizedMessage());
 			}
 		}
-		initResponsedb.setMerchantId(dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
+		initResponsedb.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
 		initResponsedb.setResponseCode("00");
 		saveToDB.saveResponseToDB(initResponsedb);
 		return initResponse;
@@ -249,7 +267,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("ccTransactionId", ccTransactionId);
-		map.add("merchantId", dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
+		map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
@@ -273,8 +291,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		log.info("Invoke curlec callNow : " + url);
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
-		map.add("employeeId", dbvalues.get(GlobalConstants.CURLEC_EMP_ID));
-		map.add("merchantId", dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID));
+		map.add("employeeId", dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID));
+		map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
 		map.add("collectionAmount", paymentRequest.getAmount());
 		map.add("refNumber", paymentRequest.getRefNumber());
 		map.add("invoiceNumber", paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo());

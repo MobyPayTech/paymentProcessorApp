@@ -780,11 +780,22 @@ public class PaymentController {
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		String serverName = dbvalues.get(GlobalConstants.SERVER_NAME);
 		log.info("Inside simulatorChargeUrl ");
-		String url = serverName + "chargeNow?merchantId="+ dbvalues.get(GlobalConstants.CURLEC_MERCHANT_ID) +"&employeeId="+ dbvalues.get(GlobalConstants.CURLEC_EMP_ID) +"&refNumber="
-				+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
-				+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
-				+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
-				+ chargeUserRequest.getRedirectUrl() + "&method=chargenowOTP";
+		String url = "";
+		if (chargeUserRequest.getClientType() == 1) {
+			url = serverName + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber="
+					+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
+					+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
+					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
+					+ "&method=chargenowOTP";
+		} else if (chargeUserRequest.getClientType() == 2) {
+			url = serverName + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber="
+					+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
+					+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
+					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
+					+ "&method=chargenowOTP";
+		}
 		log.info("URL in callChargeWithOtpUrl " + url);
 
 		return url;
