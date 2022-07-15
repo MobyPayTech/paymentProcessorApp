@@ -153,9 +153,12 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			log.info("Curlec response :" + result);
 
 			if (response != null && response.getStatusCodeValue() == 200) {
+				if(initMandate.getClientType() == 1) {
 				initResponse.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+				}else if(initMandate.getClientType() == 2) {
+					initResponse.setMerchantId(dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
+				}
 				initResponse.setResponseCode("00");
-
 				String body = response.getBody();
 				JSONObject bodyJSON = new JSONObject(body);
 				log.info("bodyJSON " + bodyJSON);
