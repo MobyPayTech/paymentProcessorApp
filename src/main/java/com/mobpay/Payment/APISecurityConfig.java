@@ -27,7 +27,6 @@ import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.dao.PaymentProcessorAuthDao;
 import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 
-@Configuration
 @EnableWebSecurity
 @Order(1)
 public class APISecurityConfig extends WebSecurityConfigurerAdapter {
@@ -49,7 +48,7 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 
 				String[] secretfromDb = getSecretValueFromDB();
 				String authEnableDetailsFromDB = getAuthEnableDetailsFromDB();
-				if (StringUtils.equalsIgnoreCase(getAuthEnableDetailsFromDB(), "1")) {
+				if (StringUtils.equalsIgnoreCase(authEnableDetailsFromDB, "1")) {
 					String principal = (String) authentication.getPrincipal();
 					List<String> secretList = Arrays.asList(secretfromDb);
 
@@ -73,7 +72,7 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest().authenticated();
 	}
 
-	@Bean
+	
 	public HashMap<String, String> getKeySecretValueFromDB() {
 		HashMap<String, String> keyMap = new HashMap<String, String>();
 		List<PaymentProcessorAuthDao> configValues = paymentProcessorAuthRepository.findAll();
@@ -111,7 +110,7 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 		return keyfromDb;
 	}
 
-	@Bean
+
 	public String[] getSecretValueFromDB() {
 		HashMap<String, String> keyMap = new HashMap<String, String>();
 
