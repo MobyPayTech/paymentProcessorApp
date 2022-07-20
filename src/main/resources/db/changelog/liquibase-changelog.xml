@@ -1,0 +1,37 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+		http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+	<changeSet author="manjuv" id="july-19-cr-40"
+		runOnChange="true">
+		<sqlFile dbms="mysql" path="/db/changelog/liquibaseTest.sql"
+			endDelimiter=";;" />
+	</changeSet>
+
+	<changeSet author="manjuv" id="july-19-refNoTable"
+		runOnChange="true">
+		<sqlFile dbms="mysql"
+			path="/db/changelog/pp_reference_number.sql" endDelimiter=";;" />
+	</changeSet>
+
+	<changeSet author="manjuv" id="insert-example"
+		runOnChange="true">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM pp_reference_number_copy WHERE Name='AP' OR Name ='MP';
+			</sqlCheck>
+		</preConditions>
+		<sqlFile dbms="mysql"
+			path="/db/changelog/pp_ref_number_insert.sql" />
+	</changeSet>
+
+
+</databaseChangeLog>
+
