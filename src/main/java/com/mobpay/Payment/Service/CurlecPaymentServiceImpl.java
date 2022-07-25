@@ -22,7 +22,6 @@ import com.mobpay.Payment.Repository.CollectionStatusRequest;
 import com.mobpay.Payment.Repository.MobyversaMandateRequestDtoEntityRepository;
 import com.mobpay.Payment.Repository.NewMandateRequestDtoEntityRepository;
 import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
-import com.mobpay.Payment.Repository.ReferenceNumberRepo;
 import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
@@ -61,7 +60,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.mobpay.Payment.dao.PaymentRequest;
-import com.mobpay.Payment.dao.ReferenceNumber;
 import com.mobpay.Payment.dao.VGSInput;
 
 import lombok.extern.slf4j.Slf4j;
@@ -78,9 +76,6 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 	SaveToDB saveToDB;
 
 	protected String curlecUrl;
-
-	@Autowired
-	private ReferenceNumberRepo referenceNumberRepo;
 
 	@Autowired
 	private ChargeUserRequestEntityRepository chargeUserRequestEntityRepository;
@@ -123,7 +118,6 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 //		String refNo = " ";
 		ResponseEntity<String> response = null;
 		InitResponseOutput initResponse = new InitResponseOutput();
-//		refNo = generateRefNo(initMandate.getClientType());
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
 		if(initMandate.getClientType() == 1 ) {
@@ -201,43 +195,43 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		return initResponse;
 	}
 
-	private String generateRefNo(int clientType) throws IOException {
-		String refNo = "";
-		long unixTimestamp = Instant.now().getEpochSecond();
-		System.out.println("unix timestamp   ------>   "+unixTimestamp);
-		ReferenceNumber updateRef = new ReferenceNumber();
-		ReadProperties properties = new ReadProperties();
-		Properties prop = null;
-		String referrnecnumber;
-		if (clientType == 1) {
-			referrnecnumber = referenceNumberRepo.findValueByName(GlobalConstants.AP);
-
-		} else if (clientType == 2) {
-			String format = "";
-			StringBuilder buffer = new StringBuilder();
-			referrnecnumber = referenceNumberRepo.findValueByName(GlobalConstants.MP);
-			log.info("referrnecnumber " + referrnecnumber);
-			format = referrnecnumber;
-			buffer.append(referrnecnumber);
-			format = String.valueOf(Integer.parseInt(format) + 1);
-			int tokenLength = format.length();
-			String formatZero = buffer.toString().substring(0, buffer.toString().length() - tokenLength) + format;
-			char[] format1 = formatZero.toCharArray();
-			log.info("format1 " + format1);
-			format = "MP";
-			for (int j = 0; j < format1.length; j++) {
-				format += format1[j];
-			}
-			refNo = format;
-			log.info("refNo " + refNo);
-			ReferenceNumber updateAP = referenceNumberRepo.getById(1);
-			updateAP.setValue(refNo.substring(2));
-			referenceNumberRepo.save(updateAP);
-			log.info("Reference Number Updated in table");
-		}
-
-		return refNo;
-	}
+//	private String generateRefNo(int clientType) throws IOException {
+//		String refNo = "";
+//		long unixTimestamp = Instant.now().getEpochSecond();
+//		System.out.println("unix timestamp   ------>   "+unixTimestamp);
+//		ReferenceNumber updateRef = new ReferenceNumber();
+//		ReadProperties properties = new ReadProperties();
+//		Properties prop = null;
+//		String referrnecnumber;
+//		if (clientType == 1) {
+//			referrnecnumber = referenceNumberRepo.findValueByName(GlobalConstants.AP);
+//
+//		} else if (clientType == 2) {
+//			String format = "";
+//			StringBuilder buffer = new StringBuilder();
+//			referrnecnumber = referenceNumberRepo.findValueByName(GlobalConstants.MP);
+//			log.info("referrnecnumber " + referrnecnumber);
+//			format = referrnecnumber;
+//			buffer.append(referrnecnumber);
+//			format = String.valueOf(Integer.parseInt(format) + 1);
+//			int tokenLength = format.length();
+//			String formatZero = buffer.toString().substring(0, buffer.toString().length() - tokenLength) + format;
+//			char[] format1 = formatZero.toCharArray();
+//			log.info("format1 " + format1);
+//			format = "MP";
+//			for (int j = 0; j < format1.length; j++) {
+//				format += format1[j];
+//			}
+//			refNo = format;
+//			log.info("refNo " + refNo);
+//			ReferenceNumber updateAP = referenceNumberRepo.getById(1);
+//			updateAP.setValue(refNo.substring(2));
+//			referenceNumberRepo.save(updateAP);
+//			log.info("Reference Number Updated in table");
+//		}
+//
+//		return refNo;
+//	}
 
 	public ResponseEntity<String> checkCurlecStatus(String ccTransactionId) {
 		String url = "";
