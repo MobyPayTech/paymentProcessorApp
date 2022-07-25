@@ -63,7 +63,7 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 			@Override
 			public Authentication authenticate(Authentication authentication) throws BadCredentialsException {
 				String authEnableDetailsFromDB = getAuthEnableDetailsFromDB();
-				if (StringUtils.equalsIgnoreCase(authEnableDetailsFromDB, "0")) {
+				if (StringUtils.equalsIgnoreCase(authEnableDetailsFromDB, "1")) {
 					String principal = (String) authentication.getPrincipal();
 
 					String[] secretfromDb = getSecretValueFromDB();

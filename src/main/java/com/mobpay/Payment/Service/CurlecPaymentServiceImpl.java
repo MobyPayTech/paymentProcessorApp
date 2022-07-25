@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -119,14 +120,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		Curlec_MandateResponse initResponsedb = new Curlec_MandateResponse();
 		String effectiveDate = formatter.format(date);
 		String url = "";
-		String refNo = " ";
+//		String refNo = " ";
 		ResponseEntity<String> response = null;
 		InitResponseOutput initResponse = new InitResponseOutput();
-		refNo = generateRefNo(initMandate.getClientType());
+//		refNo = generateRefNo(initMandate.getClientType());
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
 		if(initMandate.getClientType() == 1 ) {
-		url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo + "&effectiveDate=" + effectiveDate
+		url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
 				+ "&expiryDate=&amount=30000.00"
 				+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 				+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
@@ -134,7 +135,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID) + "&employeeId="
 				+ dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
 		}else if(initMandate.getClientType() == 2) {
-			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + refNo + "&effectiveDate=" + effectiveDate
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
 					+ "&expiryDate=&amount=30000.00"
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
@@ -202,32 +203,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 	private String generateRefNo(int clientType) throws IOException {
 		String refNo = "";
+		long unixTimestamp = Instant.now().getEpochSecond();
+		System.out.println("unix timestamp   ------>   "+unixTimestamp);
 		ReferenceNumber updateRef = new ReferenceNumber();
 		ReadProperties properties = new ReadProperties();
 		Properties prop = null;
 		String referrnecnumber;
 		if (clientType == 1) {
-			String format = "";
-			StringBuilder buffer = new StringBuilder();
 			referrnecnumber = referenceNumberRepo.findValueByName(GlobalConstants.AP);
-			log.info("referrnecnumber " + referrnecnumber);
-			format = referrnecnumber;
-			buffer.append(referrnecnumber);
-			format = String.valueOf(Integer.parseInt(format) + 1);
-			int tokenLength = format.length();
-			String formatZero = buffer.toString().substring(0, buffer.toString().length() - tokenLength) + format;
-			char[] format1 = formatZero.toCharArray();
-			log.info("format1 " + format1);
-			format = "AP";
-			for (int j = 0; j < format1.length; j++) {
-				format += format1[j];
-			}
-			refNo = format;
-			log.info("refNo " + refNo);
-			ReferenceNumber updateAP = referenceNumberRepo.getById(0);
-			updateAP.setValue(refNo.substring(2));
-			referenceNumberRepo.save(updateAP);
-			log.info("Reference Number Updated in table");
 
 		} else if (clientType == 2) {
 			String format = "";

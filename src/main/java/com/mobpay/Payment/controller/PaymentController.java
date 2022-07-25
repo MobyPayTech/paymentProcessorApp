@@ -36,8 +36,10 @@ import com.mobpay.Payment.dao.PaymentLogs;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
+import liquibase.exception.DatabaseException;
 import lombok.extern.slf4j.Slf4j;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -45,6 +47,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,9 +66,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,6 +79,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 
 @Slf4j
 @Controller
@@ -345,10 +353,24 @@ public class PaymentController {
 	@PostMapping(value = "/initmandate")
 	public Object callInitMandate(@RequestBody InitMandate initMandate) throws Exception {
 		log.info("Inside initpayment" + initMandate);
-		saveToDB.saveRequestToDB(initMandate);
-
+		long referenceNumber = Instant.now().getEpochSecond();
+		try {
+			initMandate.setReferenceNumber(referenceNumber);
+			saveToDB.saveRequestToDB(initMandate);
+		} catch (Exception e) {
+			if (e.getCause() instanceof ConstraintViolationException) {
+				ConstraintViolationException consEx = (ConstraintViolationException) e.getCause();
+				String constraintName = consEx.getConstraintName();
+				if (constraintName.contains("referenceNumber")) {
+					referenceNumber = Instant.now().getEpochSecond();
+					initMandate.setReferenceNumber(referenceNumber);
+					saveToDB.saveRequestToDB(initMandate);
+				}
+			} else {
+				log.error(e.getLocalizedMessage());
+			}
+		}
 		InitResponseOutput initResponse = new InitResponseOutput();
-
 		try {
 			if (initMandate.getEmail() == null || initMandate.getMobileNo() == null
 					|| initMandate.getNameOnCard() == null || initMandate.getIdValue() == null
@@ -364,7 +386,7 @@ public class PaymentController {
 			PaymentLogs paymentLogs = new PaymentLogs();
 			paymentLogs.setRequest(initMandate.toString());
 			paymentLogs.setResponse(initResponse.toString());
-			 saveToDB.saveRequestToDB(paymentLogs);
+			saveToDB.saveRequestToDB(paymentLogs);
 		} catch (InternalServerError e) {
 			log.error("Exception in init payment" + e);
 			initResponse.setResponseCode("01");

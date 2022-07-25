@@ -46,5 +46,7 @@ public class InitMandate {
     private Date createdAt;
     @Column(name = "UpdatedAt")
     private Date updatedAt;
+    @Column(name = "referenceNumber", unique=true, nullable = false)
+    private Long referenceNumber;
 
 }
