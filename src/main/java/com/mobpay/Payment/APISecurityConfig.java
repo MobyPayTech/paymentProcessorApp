@@ -1,13 +1,16 @@
 package com.mobpay.Payment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +23,7 @@ import com.mobpay.Payment.Repository.PaymentProcessorAuthRepository;
 import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.dao.PaymentProcessorAuthDao;
+import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 
 @EnableWebSecurity
 @Order(1)
@@ -30,6 +34,9 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
+	
+	@Autowired          
+    private RedisTemplate<Integer, PaymentProcessorAuthDao> redisTemplateForAuth;
 
 	@Override
 	public void configure(HttpSecurity httpSecurity) throws Exception {
@@ -50,8 +57,21 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 
 		return secretfromDb;
 	}
+	
+	public List<PaymentProcessorAuthDao> getSecretValuesToRedis() {
+		List<PaymentProcessorAuthDao> configValues = paymentProcessorAuthRepository.findAll();
+		System.out.println("Size " + configValues.size());
+		List<Integer> multiKeys = new ArrayList<>();
+		for (int i = 0; i < configValues.size(); i++) {
+			redisTemplateForAuth.opsForValue().set(i, configValues.get(i));
+			multiKeys.add(i);
+		}
+		return redisTemplateForAuth.opsForValue().multiGet(multiKeys);
+	}
 
-	private String getAuthEnableDetailsFromDB() {
+	
+	@Bean
+	public String getAuthEnableDetailsFromDB() {
 		String configValues = paymentProcessorConfigRepository.findValueFromName(GlobalConstants.PLATFORM_AUTH);
 		return configValues;
 	}
@@ -65,8 +85,9 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 				String authEnableDetailsFromDB = getAuthEnableDetailsFromDB();
 				if (StringUtils.equalsIgnoreCase(authEnableDetailsFromDB, "1")) {
 					String principal = (String) authentication.getPrincipal();
-
-					String[] secretfromDb = getSecretValueFromDB();
+					List<PaymentProcessorAuthDao> secretValuesToRedis = getSecretValuesToRedis();
+					List<String> secretValuesFromRedis = secretValuesToRedis.stream().map(element -> element.getApi_secret()).collect(Collectors.toList());
+					String[] secretfromDb = secretValuesFromRedis.stream().toArray(String[]::new);
 					List<String> secretList = Arrays.asList(secretfromDb);
 
 					if (!secretList.contains(principal)) {

@@ -33,6 +33,7 @@ import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.MobiCallBackDto;
 import com.mobpay.Payment.dao.MobiversaPaymentResponse;
 import com.mobpay.Payment.dao.PaymentLogs;
+import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 
@@ -48,6 +49,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -132,7 +134,7 @@ public class PaymentController {
 	
 	@Autowired
 	private CurlecPaymentService callBackUrl;
-
+	
 	// @Value("${payment.callback.url}")
 	protected String paymentCallBackUrl;
 	protected String simulator = null;
@@ -418,16 +420,18 @@ public class PaymentController {
 
 		log.info("chargeUserRequest " + chargeUserRequest);
 //		merchantCallbackUrl = chargeUserRequest.getCallBackUrl();
-		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
+//		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
+		PaymentProcessorsysconfig callbackUrlsfromRedis = getSysConfigvalue(GlobalConstants.PAYMENT_CALLBACK_URL);
+		paymentCallBackUrl = callbackUrlsfromRedis.getValue();
+		System.out.println("paymentCallBackUrl **************************************"+paymentCallBackUrl);
 		log.debug("merchantCallbackUrl " + chargeUserRequest.getCallBackUrl());
 //		chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 		log.debug("chargeUserRequest after setting payment callback url " + chargeUserRequest);
 		log.info("WithOtp " + chargeUserRequest.getWithOtp());
-
-		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
-
-		simulator = dbvalues.get(GlobalConstants.SIMULATOR_CALL);
+		PaymentProcessorsysconfig redisCallBackUrl = getSysConfigvalue(GlobalConstants.PAYMENT_CALLBACK_URL);
+		paymentCallBackUrl = redisCallBackUrl.getValue();
+		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
+		simulator = redisSimulator.getValue();
 		boolean withotp = chargeUserRequest.getWithOtp();
 		if (simulator.equals("true")) {
 			try {
@@ -597,6 +601,11 @@ public class PaymentController {
 		return paymentResponse;
 	}
 
+	private PaymentProcessorsysconfig getSysConfigvalue(String key) {
+		PaymentProcessorsysconfig readValuesFromRedis = dbconfig.readValuesFromRedis(key);
+		return readValuesFromRedis;
+	}
+
 	// Curlec
 	@ResponseBody
 	@PostMapping(value = "/checkcollectionstatus")
@@ -609,8 +618,8 @@ public class PaymentController {
 		ObjectMapper mapper = new ObjectMapper();
 		String res;
 		log.info("Inside checkcollectionstatus " + collectionStatusRequest);
-		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		simulator = dbvalues.get(GlobalConstants.SIMULATOR_CALL);
+		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
+		simulator = redisSimulator.getValue();
 		if (simulator.equals("true")) {
 			log.info("Inside Simulator ");
 			statusResponse.setCollection_status("SUCCESSFULLY_COMPLETE");
@@ -799,20 +808,24 @@ public class PaymentController {
 	 * result.getBody(); }
 	 */
 	public String simulatorChargeUrl(ChargeUserRequest chargeUserRequest, String callBackUrl) {
-		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
-		String serverName = dbvalues.get(GlobalConstants.SERVER_NAME);
+		PaymentProcessorsysconfig serverNameFromRedis = getSysConfigvalue(GlobalConstants.SERVER_NAME);
+		String serverName = serverNameFromRedis.getValue();
+		PaymentProcessorsysconfig apmerchantId = getSysConfigvalue(GlobalConstants.AP_CURLEC_MERCHANT_ID);
+		PaymentProcessorsysconfig apEmpID = getSysConfigvalue(GlobalConstants.AP_CURLEC_EMP_ID);
+		PaymentProcessorsysconfig mpMerchantID = getSysConfigvalue(GlobalConstants.MP_CURLEC_MERCHANT_ID);
+		 PaymentProcessorsysconfig mpEmpID = getSysConfigvalue(GlobalConstants.MP_CURLEC_EMP_ID);
 		log.info("Inside simulatorChargeUrl ");
 		String url = "";
 		if (chargeUserRequest.getClientType() == 1) {
-			url = serverName + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID)
-					+ "&employeeId=" + dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber="
+			url = serverName + "chargeNow?merchantId=" + apmerchantId.getValue()
+					+ "&employeeId=" + apEmpID.getValue() + "&refNumber="
 					+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
 					+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
 					+ "&method=chargenowOTP";
 		} else if (chargeUserRequest.getClientType() == 2) {
-			url = serverName + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID)
-					+ "&employeeId=" + dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber="
+			url = serverName + "chargeNow?merchantId=" + mpMerchantID.getValue()
+					+ "&employeeId=" + mpEmpID.getValue() + "&refNumber="
 					+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
 					+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
@@ -903,5 +916,5 @@ public class PaymentController {
 	public String pingServer() {
 		return "Server is up";
 	}
-
+	
 }
