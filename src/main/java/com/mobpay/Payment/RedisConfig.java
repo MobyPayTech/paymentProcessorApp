@@ -25,6 +25,7 @@ public class RedisConfig {
 
 	private String host;
 	private String password;
+	private String username;
 
 	@Bean
 	@Primary
@@ -38,6 +39,7 @@ public class RedisConfig {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
 		config.setHostName(host);
 		config.setPassword(RedisPassword.of(password));
+		config.setUsername(username);
 		return config;
 	}
 
