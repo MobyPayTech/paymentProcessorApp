@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.data.redis.core.RedisHash;
+
 import lombok.Data;
 
 @Entity
@@ -17,7 +19,7 @@ public class PaymentProcessorsysconfig implements Serializable{
 	
 	private static final long serialVersionUID = 7156526077883281623L;
 	
-	   @Id
+	   	@Id
 	    @Column(name = "name")
 	    private String name;
 	    @Column(name = "value")

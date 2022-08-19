@@ -10,6 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.data.redis.core.RedisHash;
+
 import lombok.Data;
 
 @Entity

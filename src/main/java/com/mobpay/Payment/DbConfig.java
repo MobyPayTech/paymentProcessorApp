@@ -44,13 +44,13 @@ public class DbConfig {
 	
 	public void saveAll(List<PaymentProcessorsysconfig> list) {
 		for (PaymentProcessorsysconfig itr : list) {
-			redisTemplate.opsForValue().set(itr.getName(), itr);
+			redisTemplate.opsForValue().set("paymentProcessor/"+itr.getName(), itr);
 		}
 		System.out.println(redisTemplate.opsForValue());
     }
 	
 	public PaymentProcessorsysconfig readValuesFromRedis(String key){
-		PaymentProcessorsysconfig paymentProcessorsysconfig = redisTemplate.opsForValue().get(key);
+		PaymentProcessorsysconfig paymentProcessorsysconfig = redisTemplate.opsForValue().get("paymentProcessor/"+key);
 		return paymentProcessorsysconfig;
 	}
 }

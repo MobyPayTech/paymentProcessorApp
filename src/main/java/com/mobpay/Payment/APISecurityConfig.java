@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,7 +37,7 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 	PaymentProcessorConfigRepository paymentProcessorConfigRepository;
 	
 	@Autowired          
-    private RedisTemplate<Integer, PaymentProcessorAuthDao> redisTemplateForAuth;
+    private RedisTemplate<String, PaymentProcessorAuthDao> redisTemplateForAuth;
 
 	@Override
 	public void configure(HttpSecurity httpSecurity) throws Exception {
@@ -61,12 +62,15 @@ public class APISecurityConfig extends WebSecurityConfigurerAdapter {
 	public List<PaymentProcessorAuthDao> getSecretValuesToRedis() {
 		List<PaymentProcessorAuthDao> configValues = paymentProcessorAuthRepository.findAll();
 		System.out.println("Size " + configValues.size());
-		List<Integer> multiKeys = new ArrayList<>();
+		List<PaymentProcessorAuthDao> redisData = new ArrayList<>();
 		for (int i = 0; i < configValues.size(); i++) {
-			redisTemplateForAuth.opsForValue().set(i, configValues.get(i));
-			multiKeys.add(i);
+			redisTemplateForAuth.opsForValue().set("paymentProcessor/"+configValues.get(i).getId(), configValues.get(i));
 		}
-		return redisTemplateForAuth.opsForValue().multiGet(multiKeys);
+		for(int j=0;j<configValues.size();j++) {
+			redisData.add(redisTemplateForAuth.opsForValue().get("paymentProcessor/"+configValues.get(j)));
+			System.out.println(redisData.get(j));
+		}
+		return redisData;
 	}
 
 	

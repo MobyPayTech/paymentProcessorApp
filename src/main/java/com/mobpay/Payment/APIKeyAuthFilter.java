@@ -35,7 +35,7 @@ public class APIKeyAuthFilter extends AbstractPreAuthenticatedProcessingFilter {
 	private Map<String, String> keySecretMap = new HashMap<>();
 	
 	@Autowired          
-    private RedisTemplate<Integer, PaymentProcessorAuthDao> redisTemplateForAuth;
+    private RedisTemplate<String, PaymentProcessorAuthDao> redisTemplateForAuth;
 
 	public APIKeyAuthFilter() {
 	}
@@ -103,14 +103,17 @@ public class APIKeyAuthFilter extends AbstractPreAuthenticatedProcessingFilter {
 	}
 	
 	public List<PaymentProcessorAuthDao> getKeyValueFromDBStringToRedis() {
-		HashMap<String, String> keyMap = new HashMap<String, String>();
 		List<PaymentProcessorAuthDao> configValues = paymentProcessorAuthRepository.findAll();
-		List<Integer> multiKeys = new ArrayList<>();
+		System.out.println("Size " + configValues.size());
+		List<PaymentProcessorAuthDao> redisData = new ArrayList<>();
 		for (int i = 0; i < configValues.size(); i++) {
-			redisTemplateForAuth.opsForValue().set(i, configValues.get(i));
-			multiKeys.add(i);
+			redisTemplateForAuth.opsForValue().set("paymentProcessor/"+configValues.get(i).getId(), configValues.get(i));
 		}
-		return redisTemplateForAuth.opsForValue().multiGet(multiKeys);
+		for(int j=0;j<configValues.size();j++) {
+			redisData.add(redisTemplateForAuth.opsForValue().get("paymentProcessor/"+configValues.get(j)));
+			System.out.println(redisData.get(j));
+		}
+		return redisData;
 	}
 
 	public HashMap<String, String> getKeySecretValueFromDB() {
@@ -130,12 +133,15 @@ public class APIKeyAuthFilter extends AbstractPreAuthenticatedProcessingFilter {
 	public List<PaymentProcessorAuthDao> getSecretValuesToRedis() {
 		List<PaymentProcessorAuthDao> configValues = paymentProcessorAuthRepository.findAll();
 		System.out.println("Size " + configValues.size());
-		List<Integer> multiKeys = new ArrayList<>();
+		List<PaymentProcessorAuthDao> redisData = new ArrayList<>();
 		for (int i = 0; i < configValues.size(); i++) {
-			redisTemplateForAuth.opsForValue().set(i, configValues.get(i));
-			multiKeys.add(i);
+			redisTemplateForAuth.opsForValue().set("paymentProcessor/"+configValues.get(i), configValues.get(i));
 		}
-		return redisTemplateForAuth.opsForValue().multiGet(multiKeys);
+		for(int j=0;j<configValues.size();j++) {
+			redisData.add(redisTemplateForAuth.opsForValue().get("paymentProcessor/"+configValues.get(j)));
+			System.out.println(redisData.get(j));
+		}
+		return redisData;
 	}
 
 }
