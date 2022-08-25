@@ -101,7 +101,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 					+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
 					+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
 					+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
+		}else if(paymentRequest.getClientType() == 99) {
+			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID) + "&employeeId="
+					+ dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&refNumber=" + paymentRequest.getRefNumber()
+					+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
+					+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
+					+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
 		}
+		
 		log.info("URL in callChargeWithOtpUrl " + url);
 		return url;
 	}
@@ -136,6 +143,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
 					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID) + "&employeeId="
 					+ dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+		}else if(initMandate.getClientType() == 99) {
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
+					+ "&expiryDate=&amount=30000.00"
+					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
+					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
+					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
+					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID) + "&employeeId="
+					+ dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&method=04&paymentMethod=2";
 		}
 
 		log.info("Invoke curlec new mandate API :" + url);
@@ -152,6 +167,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				initResponse.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
 				}else if(initMandate.getClientType() == 2) {
 					initResponse.setMerchantId(dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
+				}else if(initMandate.getClientType() == 99) {
+					initResponse.setMerchantId(dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
 				}
 				initResponse.setResponseCode("00");
 				String body = response.getBody();

@@ -812,8 +812,13 @@ public class PaymentController {
 		String serverName = serverNameFromRedis.getValue();
 		PaymentProcessorsysconfig apmerchantId = getSysConfigvalue(GlobalConstants.AP_CURLEC_MERCHANT_ID);
 		PaymentProcessorsysconfig apEmpID = getSysConfigvalue(GlobalConstants.AP_CURLEC_EMP_ID);
+		
+		
 		PaymentProcessorsysconfig mpMerchantID = getSysConfigvalue(GlobalConstants.MP_CURLEC_MERCHANT_ID);
 		 PaymentProcessorsysconfig mpEmpID = getSysConfigvalue(GlobalConstants.MP_CURLEC_EMP_ID);
+		 
+		 PaymentProcessorsysconfig mpLegacyEmpfor99 = getSysConfigvalue(GlobalConstants.AP_CURLEC_EMP_ID);
+			PaymentProcessorsysconfig mpLegacyMercFor99 = getSysConfigvalue(GlobalConstants.MP_CURLEC_MERCHANT_ID);
 		log.info("Inside simulatorChargeUrl ");
 		String url = "";
 		if (chargeUserRequest.getClientType() == 1) {
@@ -830,6 +835,13 @@ public class PaymentController {
 					+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
 					+ "&method=chargenowOTP";
+		} else if (chargeUserRequest.getClientType() == 99) {
+			url = serverName + "chargeNow?merchantId=" + mpLegacyEmpfor99.getValue()
+			+ "&employeeId=" + mpLegacyMercFor99.getValue() + "&refNumber="
+			+ chargeUserRequest.getRefNumber() + "&collectionAmount=" + chargeUserRequest.getAmount()
+			+ "&invoiceNumber=" + chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo()
+			+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + chargeUserRequest.getRedirectUrl()
+			+ "&method=chargenowOTP";
 		}
 		log.info("URL in callChargeWithOtpUrl " + url);
 

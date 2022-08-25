@@ -39,6 +39,18 @@
 		</preConditions>
 		<dropTable tableName="pp_reference_number" />
 	</changeSet>
+	
+	<changeSet author="manjuv" id="mp-legacy-insert"
+		runOnChange="true">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM
+				paymentprocessor_sysconfig WHERE Name='platform.mp-legacy.curlec.employee.id' OR Name ='platform.mp-legacy.curlec.merchant.id';
+			</sqlCheck>
+		</preConditions>
+		<sqlFile dbms="mysql"
+			path="/db/changelog/sysconfig-mo-legacy-insert.sql" />
+	</changeSet>
 
 </databaseChangeLog>
 

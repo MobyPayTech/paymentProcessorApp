@@ -45,6 +45,7 @@ public class RedisConfig {
 	public @PreDestroy void flushDb() {
 		Jedis jedis = new Jedis(host, port);
 		jedis.auth(username, password);
+//		jedis.auth(password); //to run in local
 		Set<String> keys = jedis.keys("paymentProcessor/*");
 		for (String key : keys) {
 			jedis.del(key);
