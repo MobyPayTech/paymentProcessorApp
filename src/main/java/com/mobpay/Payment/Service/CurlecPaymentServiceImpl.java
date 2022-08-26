@@ -251,7 +251,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 //		return refNo;
 //	}
 
-	public ResponseEntity<String> checkCurlecStatus(String ccTransactionId) {
+	public ResponseEntity<String> checkCurlecStatus(CollectionStatusRequest ccTransaction) {
 		String url = "";
 		ResponseEntity<String> statusResponse = null;
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
@@ -264,8 +264,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("ccTransactionId", ccTransactionId);
-		map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+		map.add("ccTransactionId", ccTransaction.getCcTransactionId());
+		if (ccTransaction.getClientType() == 1) {
+			map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+		} else if (ccTransaction.getClientType() == 2) {
+			map.add("merchantId", dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
+		} else if (ccTransaction.getClientType() == 99) {
+			map.add("merchantId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
+		}
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 

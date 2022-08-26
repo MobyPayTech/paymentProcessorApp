@@ -641,7 +641,7 @@ public class PaymentController {
 					statusResponse.setErrorMsg("Mandatory value is empty");
 				} else {
 					ResponseEntity<String> curlecStatusResponse = curlecPaymentService
-							.checkCurlecStatus(collectionStatusRequest.getCcTransactionId());
+							.checkCurlecStatus(collectionStatusRequest);
 					statusResponse.setResponseCode("00");
 					statusResponsedb.setResponseCode("00");
 					log.info("Response from curlec collection status " + statusResponse);
