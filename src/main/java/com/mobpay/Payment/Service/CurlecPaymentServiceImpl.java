@@ -35,6 +35,7 @@ import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.MandateStatusRequest;
 import com.mobpay.Payment.dao.MobyversaNewMandateRequestDto;
 import com.mobpay.Payment.dao.NewMandateRequestDto;
+import com.mobpay.Payment.dao.PaymentLogs;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.util.privilegedactions.GetInstancesFromServiceLoader;
@@ -288,17 +289,31 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		log.info("Invoke curlec callNow : " + url);
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+		if(paymentRequest.getClientType() == 1 ) {
 		map.add("employeeId", dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID));
 		map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+		}else if(paymentRequest.getClientType() == 2) {
+			map.add("employeeId", dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID));
+			map.add("merchantId", dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
+		}else if(paymentRequest.getClientType() == 99) {
+			map.add("employeeId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID));
+			map.add("merchantId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
+		}
 		map.add("collectionAmount", paymentRequest.getAmount());
 		map.add("refNumber", paymentRequest.getRefNumber());
 		map.add("invoiceNumber", paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo());
 		map.add("collectionCallbackUrl", paymentRequest.getCallBackUrl());
 		map.add("redirectUrl", paymentRequest.getRedirectUrl());
+		
 		log.info("Invoke curlec callNow with request body: " + map);
 		HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(map, headers);
 
 		chargeNowResponse = restTemplate.postForEntity(url, request, String.class);
+		//Logging deatils to db
+		PaymentLogs paymentLogs = new PaymentLogs();
+		paymentLogs.setRequest(paymentRequest.toString());
+		paymentLogs.setResponse(chargeNowResponse.toString());
+		 saveToDB.saveRequestToDB(paymentLogs);
 		return chargeNowResponse;
 	}
 

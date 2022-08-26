@@ -40,6 +40,7 @@ import com.mobpay.Payment.dao.PaymentResponse;
 import liquibase.exception.DatabaseException;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -489,7 +490,7 @@ public class PaymentController {
 //					chargeUserRequest.setCallBackUrl(paymentCallBackUrl);
 					String curlecRequestUrl = curlecPaymentService.callChargeWithOtpUrl(chargeUserRequest,paymentCallBackUrl);
 					log.info("ChargeWithOtpResponse url to hit curlec" + curlecRequestUrl);
-					if (curlecRequestUrl != null) {
+					if (StringUtils.isNotBlank(curlecRequestUrl)) {
 
 						paymentResponse.setChargeNowWithOtpUrl(curlecRequestUrl);
 						paymentResponse.setInvoiceNumber(
@@ -503,7 +504,7 @@ public class PaymentController {
 								chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
 						paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
 						paymentResponseDB.setRefNumber(chargeUserRequest.getRefNumber());
-					} else if (curlecRequestUrl == null) {
+					} else {
 						paymentResponse.setErrorMsg("FAILURE");
 					}
 				} else if (withotp == false) {
