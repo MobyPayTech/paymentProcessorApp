@@ -1,0 +1,18 @@
+Nov 26, 2022 10:55:24 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Inside initpaymentInitMandate(id=null, serviceName=null, email=peach@example.com, mobileNo=9444907677, nameOnCard=Customer%20Name, idValue=891128065340, clientType=1, createdAt=null, updatedAt=null, referenceNumber=null)
+Nov 26, 2022 10:55:24 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - URL in callChargeWithOtpUrl https://demo.curlec.com/curlec-services/mandate?referenceNumber=1669483524&effectiveDate=2022-11-26&expiryDate=&amount=30000.00&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C&name=Customer%20Name&emailAddress=peach@example.com&phoneNumber=9444907677&idType=NRIC&idValue=891128065340&linkId=Notes&merchantId=5354721&employeeId=536358&method=04&paymentMethod=2
+Nov 26, 2022 10:55:25 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec new mandate result status code :200
+Nov 26, 2022 10:55:25 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec response :null
+Nov 26, 2022 10:55:25 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - initResponse InitResponseOutput(errorMsg=null, merchantId=5354721, responseCode=00, refNumber=1669483524, vgsNumber=nFk-27112022-1266)
+Nov 26, 2022 10:55:26 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Response from Curlec service InitResponseOutput(errorMsg=null, merchantId=5354721, responseCode=00, refNumber=1669483524, vgsNumber=nFk-27112022-1266)
+Nov 26, 2022 10:55:33 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Inside initpaymentInitMandate(id=null, serviceName=null, email=null, mobileNo=null, nameOnCard=Customer%20Name, idValue=891128065340, clientType=1, createdAt=null, updatedAt=null, referenceNumber=null)
+Nov 26, 2022 10:55:33 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+SEVERE: Inside [PaymentController:callInitMandate] - Exception Could not commit JPA transaction; nested exception is javax.persistence.RollbackException: Error while committing the transaction
+Nov 26, 2022 10:55:34 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Mandatory value is empty! 

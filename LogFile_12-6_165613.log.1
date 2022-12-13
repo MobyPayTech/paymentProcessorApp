@@ -1,0 +1,12 @@
+Dec 06, 2022 4:56:52 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Inside initpaymentInitMandate(id=null, serviceName=null, email=peach@example.com, mobileNo=9444907677, nameOnCard=Customer%20Name, idValue=891128065340, clientType=1, createdAt=null, updatedAt=null, referenceNumber=null)
+Dec 06, 2022 4:56:52 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - URL in callChargeWithOtpUrl https://demo.curlec.com/curlec-services/mandate?referenceNumber=1670326012&effectiveDate=2022-12-06&expiryDate=&amount=30000.00&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C&name=Customer%20Name&emailAddress=peach@example.com&phoneNumber=9444907677&idType=NRIC&idValue=891128065340&linkId=Notes&merchantId=5354721&employeeId=536358&method=04&paymentMethod=2
+Dec 06, 2022 4:56:54 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec new mandate result status code :200
+Dec 06, 2022 4:56:54 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec response :null
+Dec 06, 2022 4:56:54 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callCurlecNewMandateService
+INFO: Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - initResponse InitResponseOutput(errorMsg=null, merchantId=5354721, responseCode=00, refNumber=1670326012, vgsNumber=nFk-06122022-1269)
+Dec 06, 2022 4:56:54 PM com.mobpay.Payment.controller.PaymentController callInitMandate
+INFO: Inside [PaymentController:callInitMandate] - Response from Curlec service InitResponseOutput(errorMsg=null, merchantId=5354721, responseCode=00, refNumber=1670326012, vgsNumber=nFk-06122022-1269)

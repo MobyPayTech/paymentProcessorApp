@@ -51,6 +51,32 @@
 		<sqlFile dbms="mysql"
 			path="/db/changelog/sysconfig-mo-legacy-insert.sql" />
 	</changeSet>
+	
+	<changeSet author="manjuv"
+		id="alter_creditChecker_settings">
+		<sqlFile dbms="mysql"
+			path="/db/changelog/alterSysConfigTable.sql" />
+	</changeSet>
+	
+	<changeSet author="manjuv"
+		id="insert_logenabling_sysconfig">
+		<sqlFile dbms="mysql"
+			path="/db/changelog/sysConfig-platform-loginsert.sql" />
+	</changeSet>
+	
+	<changeSet author="manjuv" id="mailGunProps"
+		runOnChange="true">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM
+				paymentprocessor_sysconfig WHERE name='platform.email.mailgun.MAIL_DRIVER' OR
+				name='platform.email.mailgun.MAILGUN_DOMAIN' OR name='platform.email.mailgun.MAILGUN_HOST' OR name='platform.email.mailgun.MAILGUN_SECRET'
+				OR name ='platform.email.mailgun.MAILGUN_FROM' OR name='platform.email.notification.experian_fail';
+			</sqlCheck>
+		</preConditions>
+		<sqlFile dbms="mysql"
+			path="/db/changelog/mailGunProps.sql" />
+	</changeSet>
 
 </databaseChangeLog>
 

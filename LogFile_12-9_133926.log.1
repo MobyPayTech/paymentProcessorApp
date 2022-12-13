@@ -1,0 +1,26 @@
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - Inside charge
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - chargeUserRequest ChargeUserRequest(id=null, amount=1.0, callBackUrl=https://quocent.com/callback, redirectUrl=https://testsite.com, billCode=181093, clientType=1, withOtp=false, refNumber=AP0000000735, uniqueRequestNo=1, createdAt=null, updatedAt=null)
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - merchantCallbackUrl https://quocent.com/callback
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - ChargeUserRequest after setting payment callbackurl ChargeUserRequest(id=null, amount=1.0, callBackUrl=https://quocent.com/callback, redirectUrl=https://testsite.com, billCode=181093, clientType=1, withOtp=false, refNumber=AP0000000735, uniqueRequestNo=1, createdAt=null, updatedAt=null)
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - WithOtp false
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callChargeNow
+INFO: Inside [CurlecPaymentServiceImpl:callChargeNow] - Invoke curlec callNow : https://demo.curlec.com/curlec-services?method=60
+Dec 09, 2022 1:40:04 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl callChargeNow
+INFO: Inside [CurlecPaymentServiceImpl:callChargeNow] - Invoke curlec callNow with request body: {employeeId=[536358], merchantId=[5354721], collectionAmount=[1.0], refNumber=[AP0000000735], invoiceNumber=[181093-1], collectionCallbackUrl=[https://quocent.com/callback], redirectUrl=[https://testsite.com]}
+Dec 09, 2022 1:40:14 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - ChargeWithResponse url to hit curlec<200,{"Status":["200"],"Response":[{"collection_status":["SUCCESSFULLY_COMPLETE"],"method":["CHARGENOW"],"cc_authorisation_code":["227537"],"cc_transaction_id":["nFk-23062022-747*62"],"reference_number":["AP0000000735"],"invoice_number":["181093-1"]}],"Date":["Fri Dec 09 16:10:07 MYT 2022"]},[x-content-type-options:"nosniff", x-xss-protection:"1; mode=block", cache-control:"no-cache, no-store, max-age=0, must-revalidate", pragma:"no-cache", expires:"0", x-frame-options:"DENY", x-application-context:"application", set-cookie:"JSESSIONID=B0EF1473858A4835E44B62BE28432703; Path=/; HttpOnly; Secure", content-type:"application/json;charset=UTF-8", content-length:"287", date:"Fri, 09 Dec 2022 08:10:07 GMT", strict-transport-security:"max-age=86400;includeSubDomains;preload", content-security-policy:"frame-ancestors *.verygoodvault.com *.mepsfpx.com.my *.boostbusiness.my *.aspirasi.co *.myboost.co *.curlec.com"]>
+Dec 09, 2022 1:40:14 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] - responseJson {"collection_status":["SUCCESSFULLY_COMPLETE"],"method":["CHARGENOW"],"cc_authorisation_code":["227537"],"cc_transaction_id":["nFk-23062022-747*62"],"reference_number":["AP0000000735"],"invoice_number":["181093-1"]}
+Dec 09, 2022 1:40:14 PM com.mobpay.Payment.controller.PaymentController generateCurlecUrl
+INFO: Inside [PaymentController:generateCurlecUrl] -Callback is not null
+Dec 09, 2022 1:41:00 PM com.mobpay.Payment.controller.PaymentController checkCollectionStatus
+INFO: Inside [PaymentController:checkCollectionStatus] - Inside checkcollectionstatus CollectionStatusRequest(id=106413, ccTransactionId=nFk-23062022-747*6, clientType=1, merchantId=null, createdAt=Fri Dec 09 13:40:56 IST 2022, updatedAt=Fri Dec 09 13:40:56 IST 2022)
+Dec 09, 2022 1:41:06 PM com.mobpay.Payment.controller.PaymentController checkCollectionStatus
+INFO: Inside [PaymentController:checkCollectionStatus] - Inside normal flow simulator - false 
+Dec 09, 2022 1:41:22 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl checkCurlecStatus
+INFO: Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :https://demo.curlec.com/checkstatuscc

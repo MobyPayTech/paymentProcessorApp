@@ -115,7 +115,7 @@ public class SaveToDB {
 
 	public void saveRequestToDB(PaymentLogs paymentLogs) {
 		HashMap<String, String> valueFromDB = dbconfig.getValueFromDB();
-		if (StringUtils.equalsIgnoreCase(valueFromDB.get(GlobalConstants.PLATFORM_AUTH), "1")) {
+		if (StringUtils.equalsIgnoreCase(valueFromDB.get(GlobalConstants.PLATFORM_LOG_AUTH), "1")) {
 			String ipAddress = null;
 			String clientName = null;
 			String key = APIKeyAuthFilter.setKeyAndValue().get("headerKey");

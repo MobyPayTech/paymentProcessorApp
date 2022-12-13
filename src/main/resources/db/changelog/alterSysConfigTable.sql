@@ -1,0 +1,1 @@
+ALTER TABLE paymentprocessor_sysconfig MODIFY value LONGTEXT
