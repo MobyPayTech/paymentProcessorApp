@@ -1,6 +1,8 @@
 package com.mobpay.Payment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonSerializer;
+import com.jayway.jsonpath.JsonPath;
 import com.mobpay.Payment.DbConfig;
 import com.mobpay.Payment.EmailUtility;
 import com.mobpay.Payment.Encryption.SHA;
@@ -19,6 +21,7 @@ import com.mobpay.Payment.Repository.PaymentRequestEntityRepository;
 import com.mobpay.Payment.Repository.QueryStatusRequest;
 import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.Service.AddCardService;
+import com.mobpay.Payment.Service.CurlecMethod;
 import com.mobpay.Payment.Service.CurlecPaymentService;
 import com.mobpay.Payment.Service.CurlecPaymentServiceImpl;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
@@ -32,6 +35,7 @@ import com.mobpay.Payment.dao.CollectionStatusResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
 import com.mobpay.Payment.dao.CurlecCallbackResponse;
+import com.mobpay.Payment.dao.CurlecVoid;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.MobiCallBackDto;
@@ -55,10 +59,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,8 +88,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -159,11 +169,11 @@ public class PaymentController {
 	InitMandateResponseEntityRepository initMandateResponseEntityRepository;
 
 	@Autowired
-	ChargeUserResponseEntityRepository collectionResponseRepo;
+	ChargeUserResponseEntityRepository chargeUserResponseRepo;
 
 	@Autowired
 	private CurlecPaymentService callBackUrl;
-	
+
 	@Autowired
 	private CollectionStatusResponseEntityRepository collectionRepo;
 
@@ -223,16 +233,37 @@ public class PaymentController {
 	public HttpStatus getCurlecCallback(@RequestParam Object cc_transaction_id, @RequestParam Object invoice_number,
 			@RequestParam Object fpx_collectionStatus, @RequestParam Object fpx_sellerOrderNo) throws Exception {
 		CurlecCallback curlecCallbackResponse = new CurlecCallback();
+//		ChargeUserResponse curlecResponse = new ChargeUserResponse();
+		List<ChargeUserResponse> curlecResponse = chargeUserResponseRepo
+				.findCollectionStatusbyccTransactionId(cc_transaction_id.toString());
 		ResponseEntity<String> responseFromMerchant;
 		log.info("Inside curleccallback " + fpx_sellerOrderNo + "and  invoice number " + invoice_number);
 		HttpStatus status = HttpStatus.OK;
+		String res = "";
+		if (invoice_number != null) {
+			String[] split = invoice_number.toString().split("-");
+
+			for (int i = 0; i < split.length - 1; i++) {
+				res += split[i] + "-";
+			}
+		}
+		String billCode = StringUtils.chop(res);
 		log.info("billCode " + invoice_number.toString().split("-")[0]);
 		curlecCallbackResponse.setCcTransactionId(cc_transaction_id.toString());
-		curlecCallbackResponse.setBillCode(invoice_number.toString().split("-")[0]);
+		curlecCallbackResponse.setBillCode(billCode);
 		curlecCallbackResponse.setInvoiceNumber(invoice_number.toString());
 		curlecCallbackResponse.setCollectionStatus(fpx_collectionStatus.toString());
 		curlecCallbackResponse.setRefNumber(fpx_sellerOrderNo.toString());
 		String curlecCallbackUrl = callBackUrl.getCurlecCallbackUrl(curlecCallbackResponse);
+
+		// Saving to curlec userResponse table
+		curlecResponse.get(0).setCcTransactionId(cc_transaction_id.toString());
+		curlecResponse.get(0).setBillCode(billCode);
+		curlecResponse.get(0).setCollection_status(fpx_collectionStatus.toString());
+		curlecResponse.get(0).setRefNumber(fpx_sellerOrderNo.toString());
+		curlecResponse.get(0).setMethod(CurlecMethod.CURLEC_CALLBACK_WITHOTP.label);
+		curlecResponse.get(0).setInvoiceNumber(invoice_number.toString());
+		curlecResponse.get(0).setChargeNowWithOtpUrl(curlecCallbackUrl);
 		log.info("curlecCallbackResponse " + curlecCallbackResponse);
 		log.info("merchantCallbackUrl " + curlecCallbackUrl);
 		logger.info("Inside [PaymentController:getCurlecCallback] - curlecCallbackResponse " + curlecCallbackResponse);
@@ -242,6 +273,9 @@ public class PaymentController {
 		responseFromMerchant = curlecPaymentService.callCurlecCallback(curlecCallbackResponse, curlecCallbackUrl);
 		log.info("responseFromMerchant " + responseFromMerchant);
 		logger.info("Inside [PaymentController:getCurlecCallback] - Response From Merchant " + responseFromMerchant);
+		curlecResponse.get(0).setResponseCode(status.toString());
+		curlecResponse.get(0).setResponseMessage(curlecCallbackResponse.toString());
+		saveToDB.saveResponseToDB(curlecResponse.get(0));
 		return status;
 	}
 
@@ -532,8 +566,8 @@ public class PaymentController {
 							chargeUserRequest.getBillCode() + "-" + chargeUserRequest.getUniqueRequestNo());
 					paymentResponse.setCcTransactionId(ccTransaction);
 					paymentResponse.setRefNumber(chargeUserRequest.getRefNumber());
-
 					paymentResponseDB.setResponseCode("00");
+					paymentResponseDB.setMethod(CurlecMethod.CURLEC_CALLBACK_WITHOUTOTP.toString());
 					paymentResponseDB.setCollection_status("SUCCESSFULLY_COMPLETE");
 					paymentResponseDB.setBillCode(chargeUserRequest.getBillCode());
 					paymentResponseDB.setInvoiceNumber(
@@ -598,8 +632,8 @@ public class PaymentController {
 						if (chargeWithOtp != null && chargeWithOtp.getStatusCode().toString().contains("200 OK")
 								&& bodyJson.getJSONArray("Status").get(0).toString().equals("200")) {
 							log.info("Inside Condition Success ");
-							paymentResponse.setResponseCode("00");
-							paymentResponseDB.setResponseCode("00");
+							paymentResponse.setResponseCode("200");
+							paymentResponseDB.setResponseCode("200");
 
 							if (responseJson.get("collection_status") != null
 									&& responseJson.getJSONArray("collection_status").get(0).toString() != null) {
@@ -631,6 +665,8 @@ public class PaymentController {
 								paymentResponseDB
 										.setRefNumber(responseJson.getJSONArray("reference_number").get(0).toString());
 							}
+							paymentResponseDB.setMethod(CurlecMethod.CURLEC_CALLBACK_WITHOUTOTP.toString());
+							paymentResponseDB.setResponseMessage(responseJson.toString());
 						}
 					} else if (chargeWithOtp != null && chargeWithOtp.getStatusCode().toString().contains("200")
 							&& !bodyJson.getJSONArray("Status").get(0).toString().equals("200")) {
@@ -1024,7 +1060,7 @@ public class PaymentController {
 		log.info("Inside collectionStatusRequest " + collectionStatusRequest);
 		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
 		CollectionStatusResponse statusResponsedb = new CollectionStatusResponse();
-		
+
 		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
 		simulator = redisSimulator.getValue();
 
@@ -1055,15 +1091,20 @@ public class PaymentController {
 			}
 		} else if (simulator.equals("false")) {
 			// Check if transaction is in progress in Service DB
-			List<ChargeUserResponse> collectionStatus = collectionResponseRepo
-					.findCollectionStatusbyccTransactionId(collectionStatusRequest.getBillCode());
+			List<ChargeUserResponse> collectionStatus = chargeUserResponseRepo
+					.findCollectionStatusbyBillCode(collectionStatusRequest.getBillCode());
 			CollectionStatusRequest collectionreq = new CollectionStatusRequest();
-			if (!collectionStatus.isEmpty() && collectionStatus != null) {
+
+			ChargeUserResponse validateCollectionStatus = validateCollectionStatus(collectionStatus);
+
+			if (validateCollectionStatus != null && validateCollectionStatus.getCcTransactionId() != null) {
 				collectionreq.setClientType(collectionStatusRequest.getClientType());
-				collectionreq.setCcTransactionId(collectionStatus.get(0).getCcTransactionId());
-				List<CollectionStatusResponse> collectionDB = collectionRepo.findCollectionStatusbyccTransactionId(collectionStatus.get(0).getCcTransactionId());
+				List<ChargeUserResponse> collectionDB = null;
+				collectionreq.setCcTransactionId(validateCollectionStatus.getCcTransactionId());
+				collectionDB = chargeUserResponseRepo
+						.findCollectionStatusbyccTransactionId(validateCollectionStatus.getCcTransactionId());
 				ResponseEntity<String> curlecStatusResponse = curlecPaymentService.checkCurlecStatus(collectionreq);
-				
+
 				statusResponse.setResponseCode("00");
 				statusResponsedb.setResponseCode("00");
 				log.info("Response from curlec collection status " + statusResponse);
@@ -1079,21 +1120,43 @@ public class PaymentController {
 						collectionStatus.get(0)
 								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
 						if (!collectionDB.isEmpty() && collectionDB != null) {
-							collectionDB.get(0).setCollection_status(
+							validateCollectionStatus.setCollection_status(
 									responseJson.getJSONArray("collection_status").get(0).toString());
 						}
 					}
 					if (responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
+						collectionStatus.get(0)
+								.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 						statusResponse
 								.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 //							statusResponsedb
 //									.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
 					}
 				}
-
+//				saveToDB.saveResponseToDB(validateCollectionStatus);
 			} else {
-				statusResponse.setResponseCode("404");
-				statusResponse.setErrorMsg("Bill code not found!");
+				ChargeUserResponse response = new ChargeUserResponse();
+				boolean recordFound = false;
+				for (ChargeUserResponse chargeUserResponse : collectionStatus) {
+					if (chargeUserResponse.getCollection_status() != null && chargeUserResponse.getCollection_status()
+							.equalsIgnoreCase(GlobalConstants.SUCCESSFULLY_COMPLETE)) {
+						recordFound = Boolean.TRUE;
+						response = collectionStatus.stream()
+								.filter(o -> o.getCollection_status().equals(GlobalConstants.SUCCESSFULLY_COMPLETE))
+								.findAny().orElse(null);
+						statusResponse.setCc_transaction_id(response.getCcTransactionId());
+						statusResponse.setCollection_status(response.getCollection_status());
+						statusResponse.setReference_number(response.getRefNumber());
+						statusResponse.setResponseCode("200");
+					}
+				}
+				if (!collectionStatus.isEmpty() && collectionStatus != null && !recordFound) {
+					statusResponse.setReference_number(collectionStatus.get(0).getRefNumber());
+					statusResponse.setCc_transaction_id(collectionStatus.get(0).getCcTransactionId());
+					statusResponse.setCollection_status(collectionStatus.get(0).getCollection_status());
+					statusResponse.setResponseCode("404");
+					statusResponse.setErrorMsg("TransactionId and Collection status Null");
+				}
 			}
 		}
 
@@ -1103,6 +1166,71 @@ public class PaymentController {
 		saveToDB.saveRequestToDB(paymentLogs);
 		return statusResponse;
 
+	}
+
+	private ChargeUserResponse validateCollectionStatus(List<ChargeUserResponse> collectionStatus) {
+		ChargeUserResponse resultObject = null;
+		boolean tranInProgressPresent = Boolean.FALSE;
+		boolean tranSuccessPresent = Boolean.FALSE;
+		for (ChargeUserResponse chargeUserResponse : collectionStatus) {
+			if (chargeUserResponse.getCollection_status() != null && chargeUserResponse.getCollection_status()
+					.equalsIgnoreCase(GlobalConstants.TRANSACTION_IN_PROGRESS)) {
+				tranInProgressPresent = Boolean.TRUE;
+			}
+			if (chargeUserResponse.getCollection_status() != null && chargeUserResponse.getCollection_status()
+					.equalsIgnoreCase(GlobalConstants.SUCCESSFULLY_COMPLETE)) {
+				tranInProgressPresent = Boolean.TRUE;
+			}
+		}
+
+		if (tranInProgressPresent && tranSuccessPresent) {
+			Comparator<ChargeUserResponse> recentdatedObject = Comparator.comparing(ChargeUserResponse::getCreatedAt);
+			resultObject = collectionStatus.stream().max(recentdatedObject).get();
+			if (resultObject != null
+					&& resultObject.getCollection_status().equalsIgnoreCase(GlobalConstants.TRANSACTION_IN_PROGRESS)) {
+				EmailUtility emailUtility = new EmailUtility();
+				emailUtility.sentEmail("TRANSACTION_IN_PROGRESS is dated after SUCCESSFULLY_COMPLETE", dbconfig);
+			}
+		} else if (tranInProgressPresent) {
+			Comparator<ChargeUserResponse> recentdatedObject = Comparator.comparing(ChargeUserResponse::getCreatedAt);
+			resultObject = collectionStatus.stream().max(recentdatedObject).get();
+		}
+		return resultObject;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = {
+			"/ssVoid" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> getCurlecVoid(@RequestParam Object ccTransactionId, @RequestParam Object merchantId,
+			@RequestParam Object invoiceNumber, @RequestParam Object employeeId, @RequestParam Object reason) throws Exception {
+		CurlecVoid curlecVoid = new CurlecVoid();
+		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
+		ResponseEntity<String> responseFromMerchant;
+		CollectionStatusResponse statusResponsedb = new CollectionStatusResponse();
+		log.info("Inside getCurlecVoid" );
+		HttpStatus status = HttpStatus.OK;
+		curlecVoid.setCcTransactionId(ccTransactionId.toString());
+		curlecVoid.setMerchantId(merchantId.toString());
+		curlecVoid.setInvoiceNumber(invoiceNumber.toString());
+		curlecVoid.setEmployeeId(employeeId.toString());
+		curlecVoid.setReason(reason.toString());
+		ResponseEntity<String> curlecCallbackUrl = callBackUrl.curlecVoid(curlecVoid);
+		
+		if (curlecCallbackUrl != null) {
+			JSONObject responseJson = new JSONObject(curlecCallbackUrl.getBody().toString());
+			log.info("responseJson " + responseJson);
+			if (responseJson.getJSONArray("Response").get(0).toString() != null) {
+				statusResponsedb.setResponseMessage(responseJson.getJSONArray("Response").get(0).toString());
+			}
+			if (responseJson.getJSONArray("Status").get(0).toString() != null) {
+				statusResponsedb.setResponseCode(responseJson.getJSONArray("Status").get(0).toString());
+			}
+			statusResponsedb.setCc_transaction_id(ccTransactionId.toString());
+			
+
+	}
+	saveToDB.saveResponseToDB(statusResponsedb);
+	return curlecCallbackUrl;
 	}
 
 	@GetMapping(value = "/ping")

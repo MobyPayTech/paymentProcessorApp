@@ -14,7 +14,10 @@ import com.mobpay.Payment.dao.ChargeUserResponse;
 @Repository
 public interface ChargeUserResponseEntityRepository extends JpaRepository<ChargeUserResponse, Integer > {
 	
-	@Query( value = "SELECT * from pp_curlec_chargeUserResponse p where p.billCode = :billCode ", nativeQuery = true)
-	List<ChargeUserResponse> findCollectionStatusbyccTransactionId(@Param("billCode") String string);
+	@Query( value = "SELECT * from pp_curlec_chargeUserResponse p where p.billCode = :billCode", nativeQuery = true)
+	List<ChargeUserResponse> findCollectionStatusbyBillCode(@Param("billCode") String billCode);
+	
+	@Query( value = "SELECT * from pp_curlec_chargeUserResponse p where p.ccTransactionId = :ccTransactionId", nativeQuery = true)
+	List<ChargeUserResponse> findCollectionStatusbyccTransactionId(@Param("ccTransactionId") String tranId);
 	
 }

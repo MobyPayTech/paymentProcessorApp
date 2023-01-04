@@ -21,4 +21,6 @@ public class GlobalConstants {
 	public static final String MAILGUN_FROM_EMAILS = "platform.email.mailgun.MAILGUN_FROM";
 	public static final String MAILGUN_MAIL_TEMPLATE = "platform.email.notification.experian_fail.template";
 	public static final String PLATFORM_LOG_AUTH = "platform.log.enable";
+	public static final String TRANSACTION_IN_PROGRESS = "TRANSACTION_IN_PROGRESS";
+	public static final String SUCCESSFULLY_COMPLETE = "SUCCESSFULLY_COMPLETE";
 }

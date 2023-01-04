@@ -31,6 +31,7 @@ import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
+import com.mobpay.Payment.dao.CurlecVoid;
 import com.mobpay.Payment.dao.Curlec_MandateResponse;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitPayment;
@@ -535,6 +536,36 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public ResponseEntity<String> curlecVoid(CurlecVoid ccVoid) {
+		String url = "";
+		ResponseEntity<String> statusResponse = null;
+		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
+		curlecUrl = dbvalues.get("curlec.url");
+
+		url = curlecUrl + "ccvoid";
+		log.info("Invoke curlec to check curlec void :" + url);
+		logger.info("Inside [CurlecPaymentServiceImpl:curlecVoid] - Invoke curlec to check curlec void :" + url);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("ccTransactionId", ccVoid.getCcTransactionId());
+		map.add("merchantId", ccVoid.getMerchantId());
+		map.add("invoiceNumber", ccVoid.getInvoiceNumber());
+		map.add("employeeId", ccVoid.getEmployeeId());
+		map.add("reason", ccVoid.getReason());
+
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+
+		statusResponse = restTemplate.postForEntity(url, request, String.class);
+
+		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
+		log.info("Curlec collection status response: " + statusResponse);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
+		return statusResponse;
 	}
 
 }
