@@ -1,6 +1,7 @@
 package com.mobpay.Payment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonSerializer;
 import com.jayway.jsonpath.JsonPath;
 import com.mobpay.Payment.DbConfig;
@@ -31,6 +32,7 @@ import com.mobpay.Payment.dao.CallBackDto;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
+import com.mobpay.Payment.dao.CollectionConflictResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
@@ -44,6 +46,7 @@ import com.mobpay.Payment.dao.PaymentLogs;
 import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
+import com.mobpay.Payment.dao.RequeryRequest;
 
 import liquibase.exception.DatabaseException;
 import lombok.extern.slf4j.Slf4j;
@@ -176,6 +179,9 @@ public class PaymentController {
 
 	@Autowired
 	private CollectionStatusResponseEntityRepository collectionRepo;
+	
+	@Autowired 
+	private ObjectMapper objectMapper;
 
 	// @Value("${payment.callback.url}")
 	protected String paymentCallBackUrl;
@@ -1093,20 +1099,28 @@ public class PaymentController {
 			// Check if transaction is in progress in Service DB
 			List<ChargeUserResponse> collectionStatus = chargeUserResponseRepo
 					.findCollectionStatusbyBillCode(collectionStatusRequest.getBillCode());
-			CollectionStatusRequest collectionreq = new CollectionStatusRequest();
 
 			ChargeUserResponse validateCollectionStatus = validateCollectionStatus(collectionStatus);
 
-			if (validateCollectionStatus != null && validateCollectionStatus.getCcTransactionId() != null) {
-				collectionreq.setClientType(collectionStatusRequest.getClientType());
+			if (collectionStatus != null ) {
+				RequeryRequest requeryreq = new RequeryRequest();
+				requeryreq.setInvoiceNumber(collectionStatus.get(0).getInvoiceNumber());
 				List<ChargeUserResponse> collectionDB = null;
-				collectionreq.setCcTransactionId(validateCollectionStatus.getCcTransactionId());
 				collectionDB = chargeUserResponseRepo
-						.findCollectionStatusbyccTransactionId(validateCollectionStatus.getCcTransactionId());
-				ResponseEntity<String> curlecStatusResponse = curlecPaymentService.checkCurlecStatus(collectionreq);
-
-				statusResponse.setResponseCode("00");
-				statusResponsedb.setResponseCode("00");
+						.findCollectionStatusbyBillCode(collectionStatusRequest.getBillCode());
+				ResponseEntity<String> curlecStatusResponse = curlecPaymentService.curlecCollectionStatus(requeryreq);
+				String status = null;
+				if(curlecStatusResponse.getBody().toString().contains("409")) {
+					status= "409";
+				}else if(curlecStatusResponse.getBody().toString().contains("201")){
+					status ="201";
+				}
+				
+				
+				
+				statusResponse.setResponseCode(status);
+				statusResponsedb.setResponseCode(status);
+				statusResponse.setResponse(curlecStatusResponse.getBody().toString());
 				log.info("Response from curlec collection status " + statusResponse);
 				logger.info("Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
 						+ statusResponse);
@@ -1114,24 +1128,24 @@ public class PaymentController {
 					JSONObject responseJson = new JSONObject(curlecStatusResponse.getBody().toString());
 					log.info("responseJson " + responseJson);
 
-					if (responseJson.getJSONArray("collection_status").get(0).toString() != null) {
-						statusResponse
-								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
-						collectionStatus.get(0)
-								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
-						if (!collectionDB.isEmpty() && collectionDB != null) {
-							validateCollectionStatus.setCollection_status(
-									responseJson.getJSONArray("collection_status").get(0).toString());
-						}
-					}
-					if (responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
-						collectionStatus.get(0)
-								.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-						statusResponse
-								.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-//							statusResponsedb
-//									.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-					}
+//					if (responseJson.getJSONArray("collection_status").get(0).toString() != null) {
+//						statusResponse
+//								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
+//						collectionStatus.get(0)
+//								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
+//						if (!collectionDB.isEmpty() && collectionDB != null) {
+//							validateCollectionStatus.setCollection_status(
+//									responseJson.getJSONArray("collection_status").get(0).toString());
+//						}
+//					}
+//					if (responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
+//						collectionStatus.get(0)
+//								.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
+//						statusResponse
+//								.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
+////							statusResponsedb
+////									.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
+//					}
 				}
 //				saveToDB.saveResponseToDB(validateCollectionStatus);
 			} else {

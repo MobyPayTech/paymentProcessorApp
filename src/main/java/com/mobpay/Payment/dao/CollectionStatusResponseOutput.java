@@ -16,5 +16,6 @@ public class CollectionStatusResponseOutput {
 	private String reference_number;
 	private String responseCode;
 	private String errorMsg;
+	private String response;
 
 }

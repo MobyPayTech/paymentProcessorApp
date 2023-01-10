@@ -66,6 +66,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.mobpay.Payment.dao.PaymentRequest;
+import com.mobpay.Payment.dao.RequeryRequest;
 import com.mobpay.Payment.dao.VGSInput;
 
 import lombok.extern.slf4j.Slf4j;
@@ -562,6 +563,34 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		statusResponse = restTemplate.postForEntity(url, request, String.class);
 
+		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
+		log.info("Curlec collection status response: " + statusResponse);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
+		return statusResponse;
+	}
+	
+	@Override
+	public ResponseEntity<String> curlecCollectionStatus(RequeryRequest requeryReq) {
+		String url = "";
+		ResponseEntity<String> statusResponse = null;
+		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
+		curlecUrl = dbvalues.get("curlec.url");
+
+		url = curlecUrl + "curlec-services";
+		log.info("Invoke curlec to check collection status :" + url);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :" + url);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("invoice_number", requeryReq.getInvoiceNumber());
+		map.add("merchantId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
+		map.add("method", "05");
+
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+
+		statusResponse = restTemplate.postForEntity(url, request, String.class);
+		log.info("curlec curlec-services API request -->"+map);
 		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
 		log.info("Curlec collection status response: " + statusResponse);
 		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
