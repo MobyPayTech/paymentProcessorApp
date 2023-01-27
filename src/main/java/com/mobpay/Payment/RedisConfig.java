@@ -44,8 +44,8 @@ public class RedisConfig {
 	
 	public @PreDestroy void flushDb() {
 		Jedis jedis = new Jedis(host, port);
-		jedis.auth(username, password);
-//		jedis.auth(password); //to run in local
+//		jedis.auth(username, password);
+		jedis.auth(password); //to run in local
 		Set<String> keys = jedis.keys("paymentProcessor/*");
 		for (String key : keys) {
 			jedis.del(key);
@@ -58,7 +58,7 @@ public class RedisConfig {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
 		config.setHostName(host);
 		config.setPassword(RedisPassword.of(password));
-		config.setUsername(username);
+//		config.setUsername(username);
 		return config;
 	}
 
