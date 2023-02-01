@@ -1173,6 +1173,41 @@ public class PaymentController {
 	}
 
 	
+	@ResponseBody
+	@RequestMapping(value = {
+			"/ssVoid" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> getCurlecVoid(@RequestParam Object ccTransactionId, @RequestParam Object merchantId,
+			@RequestParam Object invoiceNumber, @RequestParam Object employeeId, @RequestParam Object reason) throws Exception {
+		CurlecVoid curlecVoid = new CurlecVoid();
+		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
+		ResponseEntity<String> responseFromMerchant;
+		CollectionStatusResponse statusResponsedb = new CollectionStatusResponse();
+		log.info("Inside getCurlecVoid" );
+		HttpStatus status = HttpStatus.OK;
+		curlecVoid.setCcTransactionId(ccTransactionId.toString());
+		curlecVoid.setMerchantId(merchantId.toString());
+		curlecVoid.setInvoiceNumber(invoiceNumber.toString());
+		curlecVoid.setEmployeeId(employeeId.toString());
+		curlecVoid.setReason(reason.toString());
+		ResponseEntity<String> curlecCallbackUrl = callBackUrl.curlecVoid(curlecVoid);
+		
+		if (curlecCallbackUrl != null) {
+			JSONObject responseJson = new JSONObject(curlecCallbackUrl.getBody().toString());
+			log.info("responseJson " + responseJson);
+			if (responseJson.getJSONArray("Response").get(0).toString() != null) {
+				statusResponsedb.setResponseMessage(responseJson.getJSONArray("Response").get(0).toString());
+			}
+			if (responseJson.getJSONArray("Status").get(0).toString() != null) {
+				statusResponsedb.setResponseCode(responseJson.getJSONArray("Status").get(0).toString());
+			}
+			statusResponsedb.setCc_transaction_id(ccTransactionId.toString());
+			
+
+	}
+	saveToDB.saveResponseToDB(statusResponsedb);
+	return curlecCallbackUrl;
+	}
+	
 
 	@GetMapping(value = "/ping")
 	public String pingServer() {
