@@ -1,23 +1,54 @@
 package com.mobpay.Payment.controller;
 
+import java.io.IOException;
+import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
+import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonSerializer;
-import com.jayway.jsonpath.JsonPath;
 import com.mobpay.Payment.DbConfig;
 import com.mobpay.Payment.EmailUtility;
 import com.mobpay.Payment.Encryption.SHA;
 import com.mobpay.Payment.Helper.PaymentValidation;
-import com.mobpay.Payment.Repository.CallBackDtoEntityRepository;
-import com.mobpay.Payment.Repository.ChargeUserRequestEntityRepository;
 import com.mobpay.Payment.Repository.ChargeUserResponseEntityRepository;
 import com.mobpay.Payment.Repository.CollectionStatusRequest;
 import com.mobpay.Payment.Repository.CollectionStatusResponseEntityRepository;
 import com.mobpay.Payment.Repository.InitMandateResponseEntityRepository;
 import com.mobpay.Payment.Repository.MobiCallBackConstructorRespository;
-import com.mobpay.Payment.Repository.MobiCallBackDtoEntityRepository;
-import com.mobpay.Payment.Repository.MobiPaymentResponseEntityRepository;
-import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.Repository.PaymentRequestEntityRepository;
 import com.mobpay.Payment.Repository.QueryStatusRequest;
 import com.mobpay.Payment.Repository.SaveToDB;
@@ -28,85 +59,23 @@ import com.mobpay.Payment.Service.CurlecPaymentServiceImpl;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
 import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.Service.MobiversaPaymentService;
-import com.mobpay.Payment.dao.CallBackDto;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
-import com.mobpay.Payment.dao.CollectionConflictResponse;
+import com.mobpay.Payment.dao.CollectionResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
-import com.mobpay.Payment.dao.CurlecCallbackResponse;
-import com.mobpay.Payment.dao.CurlecVoid;
+import com.mobpay.Payment.dao.CurlecRequeryResponse;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitResponseOutput;
-import com.mobpay.Payment.dao.MobiCallBackDto;
-import com.mobpay.Payment.dao.MobiversaPaymentResponse;
 import com.mobpay.Payment.dao.PaymentLogs;
 import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 import com.mobpay.Payment.dao.PaymentRequest;
 import com.mobpay.Payment.dao.PaymentResponse;
 import com.mobpay.Payment.dao.RequeryRequest;
 
-import liquibase.exception.DatabaseException;
 import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.ConstraintViolationException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpServerErrorException.InternalServerError;
-import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
-import javax.validation.ConstraintViolation;
 
 @Slf4j
 @Controller
@@ -1069,7 +1038,7 @@ public class PaymentController {
 
 		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
 		simulator = redisSimulator.getValue();
-
+		ResponseEntity<CurlecRequeryResponse> curlecStatusResponse = null;
 		if (simulator.equals("true")) {
 			// testing with hardcoded values
 			if (collectionStatusRequest.getStatusCode() == 1) {
@@ -1102,13 +1071,13 @@ public class PaymentController {
 
 			ChargeUserResponse validateCollectionStatus = validateCollectionStatus(collectionStatus);
 
-			if (collectionStatus != null ) {
+			if (collectionStatus != null && !collectionStatus.isEmpty()) {
 				RequeryRequest requeryreq = new RequeryRequest();
 				requeryreq.setInvoiceNumber(collectionStatus.get(0).getInvoiceNumber());
 				List<ChargeUserResponse> collectionDB = null;
 				collectionDB = chargeUserResponseRepo
 						.findCollectionStatusbyBillCode(collectionStatusRequest.getBillCode());
-				ResponseEntity<String> curlecStatusResponse = curlecPaymentService.curlecCollectionStatus(requeryreq);
+				curlecStatusResponse = curlecPaymentService.curlecCollectionStatus(requeryreq);
 				String status = null;
 				if(curlecStatusResponse.getBody().toString().contains("409")) {
 					status= "409";
@@ -1117,38 +1086,29 @@ public class PaymentController {
 				}
 				
 				
-				
 				statusResponse.setResponseCode(status);
 				statusResponsedb.setResponseCode(status);
 				statusResponse.setResponse(curlecStatusResponse.getBody().toString());
 				log.info("Response from curlec collection status " + statusResponse);
 				logger.info("Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
 						+ statusResponse);
-				if (curlecStatusResponse != null && curlecStatusResponse.getStatusCodeValue() == 200) {
-					JSONObject responseJson = new JSONObject(curlecStatusResponse.getBody().toString());
-					log.info("responseJson " + responseJson);
-
-//					if (responseJson.getJSONArray("collection_status").get(0).toString() != null) {
-//						statusResponse
-//								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
-//						collectionStatus.get(0)
-//								.setCollection_status(responseJson.getJSONArray("collection_status").get(0).toString());
-//						if (!collectionDB.isEmpty() && collectionDB != null) {
-//							validateCollectionStatus.setCollection_status(
-//									responseJson.getJSONArray("collection_status").get(0).toString());
-//						}
-//					}
-//					if (responseJson.getJSONArray("cc_transaction_id").get(0).toString() != null) {
-//						collectionStatus.get(0)
-//								.setCcTransactionId(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-//						statusResponse
-//								.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-////							statusResponsedb
-////									.setCc_transaction_id(responseJson.getJSONArray("cc_transaction_id").get(0).toString());
-//					}
+				if (curlecStatusResponse != null
+						&& curlecStatusResponse.getBody().getStatus().toString().contains("201")
+						&& curlecStatusResponse.getBody().getResponse() != null
+						&& !curlecStatusResponse.getBody().getResponse().isEmpty()
+						&& !curlecStatusResponse.getBody().getResponse().get(0).isEmpty()) {
+					if (collectionStatus.get(0).getCcTransactionId() == null) {
+						collectionStatus.get(0).setCcTransactionId(
+								curlecStatusResponse.getBody().getResponse().get(0).get(0).getCcTransactionId().get(0));
+					}
+					collectionStatus.get(0).setCollection_status(
+							curlecStatusResponse.getBody().getResponse().get(0).get(0).getCollectionStatus().get(0));
+					collectionStatus.get(0).setUpdatedAt(new Date(System.currentTimeMillis()));
 				}
-//				saveToDB.saveResponseToDB(validateCollectionStatus);
-			} else {
+			}else if(collectionStatus.isEmpty()) {
+				statusResponse.setResponseCode("404");
+				statusResponse.setErrorMsg("Record not found in internal application(Credit charge user Response Table");
+			}else {
 				ChargeUserResponse response = new ChargeUserResponse();
 				boolean recordFound = false;
 				for (ChargeUserResponse chargeUserResponse : collectionStatus) {
@@ -1178,7 +1138,7 @@ public class PaymentController {
 		paymentLogs.setRequest(collectionStatusRequest.toString());
 		paymentLogs.setResponse(statusResponse.toString());
 		saveToDB.saveRequestToDB(paymentLogs);
-		return statusResponse;
+		return curlecStatusResponse;
 
 	}
 

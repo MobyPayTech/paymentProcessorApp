@@ -13,12 +13,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mobpay.Payment.DbConfig;
 import com.mobpay.Payment.ReadProperties;
 import com.mobpay.Payment.Repository.ChargeUserRequestEntityRepository;
@@ -30,7 +34,9 @@ import com.mobpay.Payment.Repository.SaveToDB;
 import com.mobpay.Payment.dao.ChargeNowEntity;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
+import com.mobpay.Payment.dao.CollectionResponse;
 import com.mobpay.Payment.dao.CurlecCallback;
+import com.mobpay.Payment.dao.CurlecRequeryResponse;
 import com.mobpay.Payment.dao.CurlecVoid;
 import com.mobpay.Payment.dao.Curlec_MandateResponse;
 import com.mobpay.Payment.dao.InitMandate;
@@ -99,7 +105,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Autowired
 	private ChargeUserRequestEntityRepository chargeUserRequestEntityRepository;
 
@@ -113,26 +119,29 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		logger.info("Inside [CurlecPaymentServiceImpl:callChargeWithOtpUrl] - Inside callChargeWithOtpUrl ");
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
-		if(paymentRequest.getClientType() == 1) {
-		url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID) + "&employeeId="
-				+ dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
-				+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
-				+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
-				+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
-		}else if(paymentRequest.getClientType() == 2) {
-			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID) + "&employeeId="
-					+ dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber=" + paymentRequest.getRefNumber()
-					+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
-					+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
-					+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
-		}else if(paymentRequest.getClientType() == 99) {
-			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID) + "&employeeId="
-					+ dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&refNumber=" + paymentRequest.getRefNumber()
-					+ "&collectionAmount=" + paymentRequest.getAmount() + "&invoiceNumber=" + paymentRequest.getBillCode()
-					+ "-" + paymentRequest.getUniqueRequestNo() + "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl="
-					+ paymentRequest.getRedirectUrl() + "&method=chargenowOTP";
+		if (paymentRequest.getClientType() == 1) {
+			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber="
+					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
+					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
+					+ "&method=chargenowOTP";
+		} else if (paymentRequest.getClientType() == 2) {
+			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber="
+					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
+					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
+					+ "&method=chargenowOTP";
+		} else if (paymentRequest.getClientType() == 99) {
+			url = curlecUrl + "chargeNow?merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&refNumber="
+					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
+					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
+					+ "&method=chargenowOTP";
 		}
-		
+
 		log.info("URL in callChargeWithOtpUrl " + url);
 		logger.info("Inside [CurlecPaymentServiceImpl:callChargeWithOtpUrl] - URL in callChargeWithOtpUrl " + url);
 		return url;
@@ -152,34 +161,36 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		InitResponseOutput initResponse = new InitResponseOutput();
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
-		if(initMandate.getClientType() == 1 ) {
-		url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
-				+ "&expiryDate=&amount=30000.00"
-				+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
-				+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
-				+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
-				+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID) + "&employeeId="
-				+ dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
-		}else if(initMandate.getClientType() == 2) {
-			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
-					+ "&expiryDate=&amount=30000.00"
+		if (initMandate.getClientType() == 1) {
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber()
+					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
 					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
-					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID) + "&employeeId="
-					+ dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
-		}else if(initMandate.getClientType() == 99) {
-			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber() + "&effectiveDate=" + effectiveDate
-					+ "&expiryDate=&amount=30000.00"
+					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+		} else if (initMandate.getClientType() == 2) {
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber()
+					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"
 					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
 					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
 					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
-					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID) + "&employeeId="
-					+ dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&method=04&paymentMethod=2";
+					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&method=04&paymentMethod=2";
+		} else if (initMandate.getClientType() == 99) {
+			url = curlecUrl + "curlec-services/mandate?referenceNumber=" + initMandate.getReferenceNumber()
+					+ "&effectiveDate=" + effectiveDate + "&expiryDate=&amount=30000.00"
+					+ "&frequency=MONTHLY&maximumFrequency=99&purposeOfPayment=Loans&businessModel=B2C" + "&name="
+					+ initMandate.getNameOnCard().replace(" ", "%20") + "&emailAddress=" + initMandate.getEmail()
+					+ "&phoneNumber=" + initMandate.getMobileNo() + "&idType=NRIC&idValue=" + initMandate.getIdValue()
+					+ "&linkId=Notes" + "&merchantId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID)
+					+ "&employeeId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID)
+					+ "&method=04&paymentMethod=2";
 		}
 
 		log.info("Invoke curlec new mandate API :" + url);
-		logger.info("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - URL in callChargeWithOtpUrl " + url);
+		logger.info(
+				"Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - URL in callChargeWithOtpUrl " + url);
 
 		URI uri = new URI(url);
 
@@ -187,14 +198,16 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			response = restTemplate.postForEntity(uri, null, String.class);
 			log.info("Curlec new mandate result status code :" + response.getStatusCodeValue());
 			log.info("Curlec response :" + result);
-			logger.info("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec new mandate result status code :" + response.getStatusCodeValue());
+			logger.info(
+					"Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec new mandate result status code :"
+							+ response.getStatusCodeValue());
 			logger.info("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Curlec response :" + result);
 			if (response != null && response.getStatusCodeValue() == 200) {
-				if(initMandate.getClientType() == 1) {
-				initResponse.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
-				}else if(initMandate.getClientType() == 2) {
+				if (initMandate.getClientType() == 1) {
+					initResponse.setMerchantId(dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+				} else if (initMandate.getClientType() == 2) {
 					initResponse.setMerchantId(dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
-				}else if(initMandate.getClientType() == 99) {
+				} else if (initMandate.getClientType() == 99) {
 					initResponse.setMerchantId(dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
 				}
 				initResponse.setResponseCode("00");
@@ -214,7 +227,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				initResponse.setVgsNumber(sellerExorder.get(0).toString());
 				initResponsedb.setVgsNumber(sellerExorder.get(0).toString());
 				log.info("initResponse " + initResponse);
-				logger.info("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - initResponse " + initResponse);
+				logger.info(
+						"Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - initResponse " + initResponse);
 			} else if (response == null) {
 				initResponse.setResponseCode("01");
 				initResponsedb.setResponseCode("01");
@@ -222,11 +236,14 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 			}
 		} catch (Exception e) {
 			log.info("Exception while getting response :" + e.getLocalizedMessage());
-			logger.severe("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Exception while getting response :" + e.getLocalizedMessage());
+			logger.severe(
+					"Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Exception while getting response :"
+							+ e.getLocalizedMessage());
 			message = e.getLocalizedMessage().contains("Reference Number is in use!");
 			if (message == true) {
 				log.info("Reference Number is in use!");
-				logger.severe("Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Reference Number is in use!" );
+				logger.severe(
+						"Inside [CurlecPaymentServiceImpl:callCurlecNewMandateService] - Reference Number is in use!");
 				initResponse.setResponseCode("01");
 				initResponsedb.setResponseCode("01");
 				initResponse.setErrorMsg("Reference Number is in use");
@@ -288,7 +305,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		url = curlecUrl + "checkstatuscc";
 		log.info("Invoke curlec to check collection status :" + url);
-		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :" + url);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :"
+				+ url);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -309,7 +327,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
 		log.info("Curlec collection status response: " + statusResponse);
-		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: "
+				+ statusResponse);
 		return statusResponse;
 	}
 
@@ -325,13 +344,13 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		log.info("Invoke curlec callNow : " + url);
 		logger.info("Inside [CurlecPaymentServiceImpl:callChargeNow] - Invoke curlec callNow : " + url);
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
-		if(paymentRequest.getClientType() == 1 ) {
-		map.add("employeeId", dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID));
-		map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
-		}else if(paymentRequest.getClientType() == 2) {
+		if (paymentRequest.getClientType() == 1) {
+			map.add("employeeId", dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID));
+			map.add("merchantId", dbvalues.get(GlobalConstants.AP_CURLEC_MERCHANT_ID));
+		} else if (paymentRequest.getClientType() == 2) {
 			map.add("employeeId", dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID));
 			map.add("merchantId", dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
-		}else if(paymentRequest.getClientType() == 99) {
+		} else if (paymentRequest.getClientType() == 99) {
 			map.add("employeeId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID));
 			map.add("merchantId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
 		}
@@ -340,17 +359,18 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		map.add("invoiceNumber", paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo());
 		map.add("collectionCallbackUrl", paymentRequest.getCallBackUrl());
 		map.add("redirectUrl", paymentRequest.getRedirectUrl());
-		
+
 		log.info("Invoke curlec callNow with request body: " + map);
-		logger.info("Inside [CurlecPaymentServiceImpl:callChargeNow] - Invoke curlec callNow with request body: " + map);
+		logger.info(
+				"Inside [CurlecPaymentServiceImpl:callChargeNow] - Invoke curlec callNow with request body: " + map);
 		HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(map, headers);
 
 		chargeNowResponse = restTemplate.postForEntity(url, request, String.class);
-		//Logging deatils to db
+		// Logging deatils to db
 		PaymentLogs paymentLogs = new PaymentLogs();
 		paymentLogs.setRequest(paymentRequest.toString());
 		paymentLogs.setResponse(chargeNowResponse.toString());
-		 saveToDB.saveRequestToDB(paymentLogs);
+		saveToDB.saveRequestToDB(paymentLogs);
 		return chargeNowResponse;
 	}
 
@@ -472,7 +492,9 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		try {
 			content = content.replace("P", "P=");
 			log.info("Write latest generated reference number +" + content);
-			logger.info("Inside [CurlecPaymentServiceImpl:writeAPReferenceNumber] - Write latest generated reference number +" + content);
+			logger.info(
+					"Inside [CurlecPaymentServiceImpl:writeAPReferenceNumber] - Write latest generated reference number +"
+							+ content);
 			Files.write(Paths.get("/var/tmp/referenceNumber_ap.txt"), content.getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -499,7 +521,9 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 				url = merchantCallbackUrl;
 				log.info("Invoking merchant site to relay callback response : " + url);
-				logger.info("Inside [CurlecPaymentServiceImpl:callCurlecCallback] - Invoking merchant site to relay callback response : " + url);
+				logger.info(
+						"Inside [CurlecPaymentServiceImpl:callCurlecCallback] - Invoking merchant site to relay callback response : "
+								+ url);
 				List<MediaType> listM = new ArrayList<>();
 				listM.add(MediaType.APPLICATION_JSON);
 				HttpHeaders headers = new HttpHeaders();
@@ -509,17 +533,21 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 				HttpEntity<CurlecCallback> request = new HttpEntity<CurlecCallback>(curlecCallback, headers);
 				log.info("Request to merchant callback : " + request);
 				log.info("curlecCallback Request to merchant callback : " + request.getBody());
-				logger.info("Inside [CurlecPaymentServiceImpl:callCurlecCallback] - curlecCallback Request to merchant callback : " + request.getBody());
+				logger.info(
+						"Inside [CurlecPaymentServiceImpl:callCurlecCallback] - curlecCallback Request to merchant callback : "
+								+ request.getBody());
 				callbackResponse = restTemplate.postForEntity(url, request, String.class);
 				log.info("Response from merchant callback : " + callbackResponse);
 			} else {
 				log.info(" Cannot invoke merchant site as callbackUrl is empty..!");
-				logger.severe("Inside [CurlecPaymentServiceImpl:callCurlecCallback] - Cannot invoke merchant site as callbackUrl is empty..!");
+				logger.severe(
+						"Inside [CurlecPaymentServiceImpl:callCurlecCallback] - Cannot invoke merchant site as callbackUrl is empty..!");
 
 			}
 		} catch (HttpClientErrorException e) {
 			log.info(" Exception from merchant server " + e.getLocalizedMessage());
-			logger.severe("Inside [CurlecPaymentServiceImpl:callCurlecCallback] -  Exception from merchant server " + e.getLocalizedMessage());
+			logger.severe("Inside [CurlecPaymentServiceImpl:callCurlecCallback] -  Exception from merchant server "
+					+ e.getLocalizedMessage());
 		}
 		return callbackResponse;
 
@@ -530,7 +558,8 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		if (curlecCallbackReq != null && !ObjectUtils.isEmpty(curlecCallbackReq)) {
 			String uniqueRequestNo = curlecCallbackReq.getInvoiceNumber().split("-")[1];
 			ChargeUserRequest callbackUrl = chargeUserRequestEntityRepository
-					.findByrefNumberAndBillCodeAndUniqueRequestNo(curlecCallbackReq.getRefNumber(), curlecCallbackReq.getBillCode(),uniqueRequestNo);
+					.findByrefNumberAndBillCodeAndUniqueRequestNo(curlecCallbackReq.getRefNumber(),
+							curlecCallbackReq.getBillCode(), uniqueRequestNo);
 			if (callbackUrl != null && StringUtils.isNotBlank(callbackUrl.getCallBackUrl())) {
 				return callbackUrl.getCallBackUrl();
 
@@ -538,7 +567,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public ResponseEntity<String> curlecVoid(CurlecVoid ccVoid) {
 		String url = "";
@@ -565,35 +594,54 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 
 		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
 		log.info("Curlec collection status response: " + statusResponse);
-		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: "
+				+ statusResponse);
 		return statusResponse;
 	}
-	
+
 	@Override
-	public ResponseEntity<String> curlecCollectionStatus(RequeryRequest requeryReq) {
+	public ResponseEntity<CurlecRequeryResponse> curlecCollectionStatus(RequeryRequest requeryReq) {
 		String url = "";
-		ResponseEntity<String> statusResponse = null;
+		ResponseEntity<CurlecRequeryResponse> statusResponse = null;
 		HashMap<String, String> dbvalues = dbconfig.getValueFromDB();
 		curlecUrl = dbvalues.get("curlec.url");
 
 		url = curlecUrl + "curlec-services";
 		log.info("Invoke curlec to check collection status :" + url);
-		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :" + url);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :"
+				+ url);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.add("invoice_number", requeryReq.getInvoiceNumber());
-		map.add("merchantId", dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_MERCHANTID));
+		map.add("merchantId", dbvalues.get(GlobalConstants.MP_CURLEC_MERCHANT_ID));
 		map.add("method", "05");
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+		statusResponse = restTemplate.postForEntity(url, request, CurlecRequeryResponse.class);
+		
+		
+//		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+//		map.add("invoice_number", "MP-MY06002-XHOB-1661281034729-2257");
+//		map.add("merchantId", "5354721");
+//		map.add("method", "05");
+//		HttpHeaders headers = new HttpHeaders();
+//		RestTemplate restTemplate = new RestTemplate();
+//		headers.set("Content-Type", "application/x-www-form-urlencoded");
+//		//headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//		
+//		
+//		HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(map, headers);
+//		ResponseEntity<?> statusResponse1 = restTemplate.postForEntity("https://demo.curlec.com/curlec-services", request,String.class);
+//		System.out.println(statusResponse1);
+		
+		
 
-		statusResponse = restTemplate.postForEntity(url, request, String.class);
-		log.info("curlec curlec-services API request -->"+map);
+//		log.info("curlec curlec-services API request -->" + map);
 		log.info("Curlec collection status: " + statusResponse.getStatusCodeValue());
 		log.info("Curlec collection status response: " + statusResponse);
-		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: " + statusResponse);
+		logger.info("Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: "
+				+ statusResponse);
 		return statusResponse;
 	}
 

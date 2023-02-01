@@ -1,0 +1,6 @@
+Jan 30, 2023 1:05:01 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl curlecCollectionStatus
+INFO: Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Invoke curlec to check collection status :https://demo.curlec.com/curlec-services
+Jan 30, 2023 1:05:02 PM com.mobpay.Payment.Service.CurlecPaymentServiceImpl curlecCollectionStatus
+INFO: Inside [CurlecPaymentServiceImpl:checkCurlecStatus] - Curlec collection status response: <200,CurlecRequeryResponse(status=[201], message=null, date=[Mon Jan 30 15:35:02 MYT 2023]),[date:"Mon, 30 Jan 2023 07:35:01 GMT", content-length:"845", content-type:"application/json", strict-transport-security:"max-age=86400;includeSubDomains;preload", content-security-policy:"frame-ancestors *.verygoodvault.com *.mepsfpx.com.my *.boostbusiness.my *.aspirasi.co *.myboost.co *.curlec.com"]>
+Jan 30, 2023 1:05:02 PM com.mobpay.Payment.controller.PaymentController queryCollectionStatus
+INFO: Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status CollectionStatusResponseOutput(collection_status=null, cc_transaction_id=null, reference_number=null, responseCode=201, errorMsg=null, response=CurlecRequeryResponse(status=[201], message=null, date=[Mon Jan 30 15:35:02 MYT 2023]))
