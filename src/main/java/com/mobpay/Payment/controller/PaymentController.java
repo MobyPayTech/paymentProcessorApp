@@ -67,6 +67,7 @@ import com.mobpay.Payment.dao.CollectionStatusResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
 import com.mobpay.Payment.dao.CurlecRequeryResponse;
+import com.mobpay.Payment.dao.CurlecVoid;
 import com.mobpay.Payment.dao.InitMandate;
 import com.mobpay.Payment.dao.InitResponseOutput;
 import com.mobpay.Payment.dao.PaymentLogs;
