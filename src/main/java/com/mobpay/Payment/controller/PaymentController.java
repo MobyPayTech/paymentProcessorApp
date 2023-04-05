@@ -5,10 +5,8 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -59,10 +57,10 @@ import com.mobpay.Payment.Service.CurlecPaymentServiceImpl;
 import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
 import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.Service.MobiversaPaymentService;
+import com.mobpay.Payment.Service.SlackService;
 import com.mobpay.Payment.dao.ChargeUserRequest;
 import com.mobpay.Payment.dao.ChargeUserResponse;
 import com.mobpay.Payment.dao.ChargeUserResponseOutput;
-import com.mobpay.Payment.dao.CollectionResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponse;
 import com.mobpay.Payment.dao.CollectionStatusResponseOutput;
 import com.mobpay.Payment.dao.CurlecCallback;
@@ -84,6 +82,9 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentController {
 
 	public static Logger logger;
+
+	@Autowired
+	public SlackService slackService;
 
 	static {
 		try {
@@ -149,8 +150,8 @@ public class PaymentController {
 
 	@Autowired
 	private CollectionStatusResponseEntityRepository collectionRepo;
-	
-	@Autowired 
+
+	@Autowired
 	private ObjectMapper objectMapper;
 
 	// @Value("${payment.callback.url}")
@@ -214,6 +215,8 @@ public class PaymentController {
 				.findCollectionStatusbyccTransactionId(cc_transaction_id.toString());
 		ResponseEntity<String> responseFromMerchant;
 		log.info("Inside curleccallback " + fpx_sellerOrderNo + "and  invoice number " + invoice_number);
+		slackService.sendMessageToSlack(
+				"Inside curleccallback " + fpx_sellerOrderNo + "and  invoice number " + invoice_number);
 		HttpStatus status = HttpStatus.OK;
 		String res = "";
 		if (invoice_number != null) {
@@ -244,11 +247,16 @@ public class PaymentController {
 		log.info("merchantCallbackUrl " + curlecCallbackUrl);
 		logger.info("Inside [PaymentController:getCurlecCallback] - curlecCallbackResponse " + curlecCallbackResponse);
 		logger.info("Inside [PaymentController:getCurlecCallback] - merchantCallbackUrl " + curlecCallbackUrl);
+		slackService.sendMessageToSlack(
+				"Inside [PaymentController:getCurlecCallback] - curlecCallbackResponse " + curlecCallbackResponse + "\n"
+						+ "Inside [PaymentController:getCurlecCallback] - merchantCallbackUrl " + curlecCallbackUrl);
 		// TODO remove as it is used for this endpoint testing
 		// merchantCallbackUrl = "https://quocent.com/payment";
 		responseFromMerchant = curlecPaymentService.callCurlecCallback(curlecCallbackResponse, curlecCallbackUrl);
 		log.info("responseFromMerchant " + responseFromMerchant);
 		logger.info("Inside [PaymentController:getCurlecCallback] - Response From Merchant " + responseFromMerchant);
+		slackService.sendMessageToSlack(
+				"Inside [PaymentController:getCurlecCallback] - Response From Merchant " + responseFromMerchant);
 		curlecResponse.get(0).setResponseCode(status.toString());
 		curlecResponse.get(0).setResponseMessage(curlecCallbackResponse.toString());
 		saveToDB.saveResponseToDB(curlecResponse.get(0));
@@ -273,6 +281,7 @@ public class PaymentController {
 			@RequestParam(value = "nameOnCard") String nameOnCard,
 			@RequestParam(value = "creditDetails", required = false) String creditDetails) throws Exception {
 		log.info("Inside paymentwithotp");
+		slackService.sendMessageToSlack("Inside paymentwithotp");
 		PaymentRequest paymentRequest = new PaymentRequest();
 		PaymentResponse paymentResponse = new PaymentResponse();
 		ResponseEntity<String> response = null;
@@ -301,6 +310,8 @@ public class PaymentController {
 
 		log.info("paymentRequest " + paymentRequest);
 		logger.info("Inside [PaymentController:processFirstPayment] - Payment Request " + paymentRequest);
+		slackService.sendMessageToSlack(
+				"Inside [PaymentController:processFirstPayment] - Payment Request " + paymentRequest);
 		// curlec
 		/*
 		 * if(paymentRequest.getHostType() == 1) { log.info("HostType is curlec");
@@ -392,6 +403,7 @@ public class PaymentController {
 		} else {
 			log.info("HostType is invalid");
 			logger.severe("Inside [PaymentController:processFirstPayment] - HostType is invalid ");
+			slackService.sendMessageToSlack("Inside [PaymentController:processFirstPayment] - HostType is invalid ");
 		}
 
 		return paymentResponse;
@@ -403,6 +415,8 @@ public class PaymentController {
 	public Object callInitMandate(@RequestBody InitMandate initMandate) throws Exception {
 		log.info("Inside initpayment" + initMandate);
 		logger.info("Inside [PaymentController:callInitMandate] - Inside initpayment" + initMandate);
+		slackService
+				.sendMessageToSlack("Inside [PaymentController:callInitMandate] - Inside initpayment" + initMandate);
 		long referenceNumber = Instant.now().getEpochSecond();
 		try {
 			initMandate.setReferenceNumber(referenceNumber);
@@ -421,6 +435,8 @@ public class PaymentController {
 			} else {
 				log.error(e.getLocalizedMessage());
 				logger.severe("Inside [PaymentController:callInitMandate] - Exception " + e.getLocalizedMessage());
+				slackService.sendMessageToSlack(
+						"Inside [PaymentController:callInitMandate] - Exception " + e.getLocalizedMessage());
 				EmailUtility emailUtility = new EmailUtility();
 				emailUtility.sentEmail(e.getLocalizedMessage(), dbconfig);
 			}
@@ -432,6 +448,8 @@ public class PaymentController {
 					|| initMandate.getClientType() == 0) {
 				log.info("Mandatory value is empty! ");
 				logger.info("Inside [PaymentController:callInitMandate] - Mandatory value is empty! ");
+				slackService
+						.sendMessageToSlack("Inside [PaymentController:callInitMandate] - Mandatory value is empty! ");
 				EmailUtility emailUtility = new EmailUtility();
 				emailUtility.sentEmail("Inside [PaymentController:callInitMandate] - Mandatory value is empty! ",
 						dbconfig);
@@ -442,6 +460,7 @@ public class PaymentController {
 				log.info("Response from Curlec service " + initResponse);
 				logger.info(
 						"Inside [PaymentController:callInitMandate] - Response from Curlec service " + initResponse);
+				slackService.sendMessageToSlack(ccTransactionId);
 			}
 			// To add logs in DB
 			PaymentLogs paymentLogs = new PaymentLogs();
@@ -451,6 +470,8 @@ public class PaymentController {
 		} catch (InternalServerError e) {
 			log.error("Exception in init payment" + e);
 			logger.info("Inside [PaymentController:callInitMandate] - Exception in init payment" + e);
+			slackService
+					.sendMessageToSlack("Inside [PaymentController:callInitMandate] - Exception in init payment" + e);
 			initResponse.setResponseCode("01");
 			initResponse.setErrorMsg("Internal Server Error");
 			EmailUtility emailUtility = new EmailUtility();
@@ -458,6 +479,8 @@ public class PaymentController {
 		} catch (HttpServerErrorException e) {
 			log.error("Exception in init payment" + e);
 			logger.info("Inside [PaymentController:callInitMandate] - Exception in init payment" + e);
+			slackService
+					.sendMessageToSlack("Inside [PaymentController:callInitMandate] - Exception in init payment" + e);
 			initResponse.setResponseCode("01");
 			initResponse.setErrorMsg("Curlec  Server not reachable");
 			EmailUtility emailUtility = new EmailUtility();
@@ -472,6 +495,7 @@ public class PaymentController {
 	public Object generateCurlecUrl(@RequestBody ChargeUserRequest chargeUserRequest) throws Exception {
 		log.info("Inside charge ");
 		logger.info("Inside [PaymentController:generateCurlecUrl] - Inside charge");
+		slackService.sendMessageToSlack("Inside [PaymentController:generateCurlecUrl] - Inside charge");
 		ChargeUserResponse paymentResponseDB = new ChargeUserResponse();
 		ChargeUserResponseOutput paymentResponse = new ChargeUserResponseOutput();
 
@@ -486,6 +510,8 @@ public class PaymentController {
 
 		log.info("chargeUserRequest " + chargeUserRequest);
 		logger.info("Inside [PaymentController:generateCurlecUrl] - chargeUserRequest " + chargeUserRequest);
+		slackService.sendMessageToSlack(
+				"Inside [PaymentController:generateCurlecUrl] - chargeUserRequest " + chargeUserRequest);
 //		merchantCallbackUrl = )chargeUserRequest.getCallBackUrl();
 //		paymentCallBackUrl = dbvalues.get(GlobalConstants.PAYMENT_CALLBACK_URL);
 		PaymentProcessorsysconfig callbackUrlsfromRedis = getSysConfigvalue(GlobalConstants.PAYMENT_CALLBACK_URL);
@@ -501,6 +527,8 @@ public class PaymentController {
 						+ chargeUserRequest);
 		log.info("WithOtp " + chargeUserRequest.getWithOtp());
 		logger.info("Inside [PaymentController:generateCurlecUrl] - WithOtp " + chargeUserRequest.getWithOtp());
+		slackService.sendMessageToSlack(
+				"Inside [PaymentController:generateCurlecUrl] - WithOtp " + chargeUserRequest.getWithOtp());
 		PaymentProcessorsysconfig redisCallBackUrl = getSysConfigvalue(GlobalConstants.PAYMENT_CALLBACK_URL);
 		paymentCallBackUrl = redisCallBackUrl.getValue();
 		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
@@ -535,6 +563,8 @@ public class PaymentController {
 					ccTransaction = ccTransaction + "*" + unixTime;
 					log.info("ccTransaction " + ccTransaction);
 					logger.info("Inside [PaymentController:generateCurlecUrl] - ccTransaction " + ccTransaction);
+					slackService.sendMessageToSlack(
+							"Inside [PaymentController:generateCurlecUrl] - ccTransaction " + ccTransaction);
 					paymentResponse.setResponseCode("00");
 					paymentResponse.setCollection_status("SUCCESSFULLY_COMPLETE");
 					paymentResponse.setBillCode(chargeUserRequest.getBillCode());
@@ -556,6 +586,7 @@ public class PaymentController {
 			} catch (Exception e) {
 				log.info("Exception " + e);
 				logger.info("Inside [PaymentController:generateCurlecUrl] - Exception " + e);
+				slackService.sendMessageToSlack("Inside [PaymentController:generateCurlecUrl] - Exception " + e);
 				EmailUtility emailUtility = new EmailUtility();
 				emailUtility.sentEmail(e.getCause().toString(), dbconfig);
 			}
@@ -569,6 +600,9 @@ public class PaymentController {
 					log.info("ChargeWithOtpResponse url to hit curlec" + curlecRequestUrl);
 					logger.info("Inside [PaymentController:generateCurlecUrl] - ChargeWithOtpResponse url to hit curlec"
 							+ curlecRequestUrl);
+					slackService.sendMessageToSlack(
+							"Inside [PaymentController:generateCurlecUrl] - ChargeWithOtpResponse url to hit curlec"
+									+ curlecRequestUrl);
 					if (StringUtils.isNotBlank(curlecRequestUrl)) {
 
 						paymentResponse.setChargeNowWithOtpUrl(curlecRequestUrl);
@@ -595,6 +629,9 @@ public class PaymentController {
 							+ chargeWithOtp);
 					JSONObject bodyJson = new JSONObject(chargeWithOtp.getBody().toString());
 					log.info("bodyJson " + bodyJson);
+					slackService.sendMessageToSlack(
+							"Inside [PaymentController:generateCurlecUrl] - ChargeWithResponse url to hit curlec"
+									+ chargeWithOtp + "\n" + "bodyJson " + bodyJson);
 					JSONObject responseJson = null;
 					if (bodyJson.getJSONArray("Status").get(0).toString().equals("200")) {
 						log.info("Status code in response is  " + bodyJson.getJSONArray("Status").get(0).toString());
@@ -602,6 +639,8 @@ public class PaymentController {
 						responseJson = new JSONObject(bodyJson.getJSONArray("Response").get(0).toString());
 						log.info("responseJson " + responseJson);
 						logger.info("Inside [PaymentController:generateCurlecUrl] - responseJson " + responseJson);
+						slackService.sendMessageToSlack(
+								"Inside [PaymentController:generateCurlecUrl] - responseJson " + responseJson);
 						log.info("chargeWithOtp " + chargeWithOtp);
 						log.info("Status code " + chargeWithOtp.getStatusCode().toString());
 
@@ -671,6 +710,8 @@ public class PaymentController {
 				if (chargeUserRequest.getCallBackUrl() != null) {
 					log.info("Callback is not null");
 					logger.info("Inside [PaymentController:generateCurlecUrl] -Callback is not null");
+					slackService
+							.sendMessageToSlack("Inside [PaymentController:generateCurlecUrl] -Callback is not null");
 				}
 
 				saveToDB.saveResponseToDB(paymentResponseDB);
@@ -708,10 +749,14 @@ public class PaymentController {
 		log.info("Inside checkcollectionstatus " + collectionStatusRequest);
 		logger.info("Inside [PaymentController:checkCollectionStatus] - Inside checkcollectionstatus "
 				+ collectionStatusRequest);
+		slackService
+				.sendMessageToSlack("Inside [PaymentController:checkCollectionStatus] - Inside checkcollectionstatus "
+						+ collectionStatusRequest);
 		PaymentProcessorsysconfig redisSimulator = getSysConfigvalue(GlobalConstants.SIMULATOR_CALL);
 		simulator = redisSimulator.getValue();
 		if (simulator.equals("true")) {
 			log.info("Inside Simulator ");
+			slackService.sendMessageToSlack("Inside Simulator ");
 			statusResponse.setCollection_status("SUCCESSFULLY_COMPLETE");
 			statusResponse.setCc_transaction_id(collectionStatusRequest.getCcTransactionId());
 			statusResponse.setResponseCode("00");
@@ -723,11 +768,16 @@ public class PaymentController {
 		} else if (simulator.equals("false")) {
 			log.info("Inside normal flow simulator - false ");
 			logger.info("Inside [PaymentController:checkCollectionStatus] - Inside normal flow simulator - false ");
+			slackService.sendMessageToSlack(
+					"Inside [PaymentController:checkCollectionStatus] - Inside normal flow simulator - false ");
+
 			try {
 				if (collectionStatusRequest.getCcTransactionId() == null
 						|| collectionStatusRequest.getClientType() == null) {
 					log.info("Mandatory value is empty..!! ");
 					logger.info("Inside [PaymentController:checkCollectionStatus] - Mandatory value is empty..!! ");
+					slackService.sendMessageToSlack(
+							"Inside [PaymentController:checkCollectionStatus] - Mandatory value is empty..!! ");
 					statusResponse.setResponseCode("01");
 					statusResponse.setErrorMsg("Mandatory value is empty");
 					EmailUtility emailUtility = new EmailUtility();
@@ -739,6 +789,9 @@ public class PaymentController {
 					statusResponsedb.setResponseCode("00");
 					log.info("Response from curlec collection status " + statusResponse);
 					logger.info(
+							"Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
+									+ statusResponse);
+					slackService.sendMessageToSlack(
 							"Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
 									+ statusResponse);
 					if (curlecStatusResponse != null && curlecStatusResponse.getStatusCodeValue() == 200) {
@@ -919,6 +972,7 @@ public class PaymentController {
 		PaymentProcessorsysconfig mpLegacyMercFor99 = getSysConfigvalue(GlobalConstants.MP_CURLEC_MERCHANT_ID);
 		log.info("Inside simulatorChargeUrl ");
 		logger.info("Inside [PaymentController:simulatorChargeUrl] - Inside simulatorChargeUrl ");
+		slackService.sendMessageToSlack("Inside [PaymentController:simulatorChargeUrl] - Inside simulatorChargeUrl ");
 		String url = "";
 		if (chargeUserRequest.getClientType() == 1) {
 			url = serverName + "chargeNow?merchantId=" + apmerchantId.getValue() + "&employeeId=" + apEmpID.getValue()
@@ -978,13 +1032,20 @@ public class PaymentController {
 			log.info("responseFromMerchant " + responseFromMerchant);
 			logger.info(
 					"Inside [PaymentController:simulateCurlecCharge] - Response From Merchant " + responseFromMerchant);
+
 			url = redirectUrl + "?reference_number=" + refNumber + "&invoice_number=" + invoiceNumber
 					+ "&collection_status=SUCCESSFULLY_COMPLETE&cc_transaction_id=" + ccTransaction;
 			log.info("Redirect url " + redirectUrl);
 			logger.info("Inside [PaymentController:simulateCurlecCharge] - Redirect url " + redirectUrl);
+			slackService.sendMessageToSlack(
+					"Inside [PaymentController:simulateCurlecCharge] - Response From Merchant " + responseFromMerchant
+							+ "\n" + "Inside [PaymentController:simulateCurlecCharge] - Redirect url " + redirectUrl);
+
 		} catch (Exception e) {
 			log.info("Exception in simulateCurlecCharge " + e);
 			logger.info("Inside [PaymentController:simulateCurlecCharge] - Exception in simulateCurlecCharge " + e);
+			slackService.sendMessageToSlack(
+					"Inside [PaymentController:simulateCurlecCharge] - Exception in simulateCurlecCharge " + e);
 			EmailUtility emailUtility = new EmailUtility();
 			emailUtility.sentEmail(e.getLocalizedMessage().toString(), dbconfig);
 		}
@@ -1080,19 +1141,21 @@ public class PaymentController {
 						.findCollectionStatusbyBillCode(collectionStatusRequest.getBillCode());
 				curlecStatusResponse = curlecPaymentService.curlecCollectionStatus(requeryreq);
 				String status = null;
-				if(curlecStatusResponse.getBody().toString().contains("409")) {
-					status= "409";
-				}else if(curlecStatusResponse.getBody().toString().contains("201")){
-					status ="201";
+				if (curlecStatusResponse.getBody().toString().contains("409")) {
+					status = "409";
+				} else if (curlecStatusResponse.getBody().toString().contains("201")) {
+					status = "201";
 				}
-				
-				
+
 				statusResponse.setResponseCode(status);
 				statusResponsedb.setResponseCode(status);
 				statusResponse.setResponse(curlecStatusResponse.getBody().toString());
 				log.info("Response from curlec collection status " + statusResponse);
 				logger.info("Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
 						+ statusResponse);
+				slackService.sendMessageToSlack(
+						"Inside [PaymentController:checkCollectionStatus] - Response from curlec collection status "
+								+ statusResponse);
 				if (curlecStatusResponse != null
 						&& curlecStatusResponse.getBody().getStatus().toString().contains("201")
 						&& curlecStatusResponse.getBody().getResponse() != null
@@ -1106,10 +1169,11 @@ public class PaymentController {
 							curlecStatusResponse.getBody().getResponse().get(0).get(0).getCollectionStatus().get(0));
 					collectionStatus.get(0).setUpdatedAt(new Date(System.currentTimeMillis()));
 				}
-			}else if(collectionStatus.isEmpty()) {
+			} else if (collectionStatus.isEmpty()) {
 				statusResponse.setResponseCode("404");
-				statusResponse.setErrorMsg("Record not found in internal application(Credit charge user Response Table");
-			}else {
+				statusResponse
+						.setErrorMsg("Record not found in internal application(Credit charge user Response Table");
+			} else {
 				ChargeUserResponse response = new ChargeUserResponse();
 				boolean recordFound = false;
 				for (ChargeUserResponse chargeUserResponse : collectionStatus) {
@@ -1173,17 +1237,18 @@ public class PaymentController {
 		return resultObject;
 	}
 
-	
 	@ResponseBody
 	@RequestMapping(value = {
 			"/ssVoid" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getCurlecVoid(@RequestParam Object ccTransactionId, @RequestParam Object merchantId,
-			@RequestParam Object invoiceNumber, @RequestParam Object employeeId, @RequestParam Object reason) throws Exception {
+			@RequestParam Object invoiceNumber, @RequestParam Object employeeId, @RequestParam Object reason)
+			throws Exception {
 		CurlecVoid curlecVoid = new CurlecVoid();
 		CollectionStatusResponseOutput statusResponse = new CollectionStatusResponseOutput();
 		ResponseEntity<String> responseFromMerchant;
 		CollectionStatusResponse statusResponsedb = new CollectionStatusResponse();
-		log.info("Inside getCurlecVoid" );
+		log.info("Inside getCurlecVoid");
+		slackService.sendMessageToSlack("Inside getCurlecVoid");
 		HttpStatus status = HttpStatus.OK;
 		curlecVoid.setCcTransactionId(ccTransactionId.toString());
 		curlecVoid.setMerchantId(merchantId.toString());
@@ -1191,10 +1256,11 @@ public class PaymentController {
 		curlecVoid.setEmployeeId(employeeId.toString());
 		curlecVoid.setReason(reason.toString());
 		ResponseEntity<String> curlecCallbackUrl = callBackUrl.curlecVoid(curlecVoid);
-		
+
 		if (curlecCallbackUrl != null) {
 			JSONObject responseJson = new JSONObject(curlecCallbackUrl.getBody().toString());
 			log.info("responseJson " + responseJson);
+			slackService.sendMessageToSlack("responseJson " + responseJson);
 			if (responseJson.getJSONArray("Response").get(0).toString() != null) {
 				statusResponsedb.setResponseMessage(responseJson.getJSONArray("Response").get(0).toString());
 			}
@@ -1202,13 +1268,11 @@ public class PaymentController {
 				statusResponsedb.setResponseCode(responseJson.getJSONArray("Status").get(0).toString());
 			}
 			statusResponsedb.setCc_transaction_id(ccTransactionId.toString());
-			
 
+		}
+		saveToDB.saveResponseToDB(statusResponsedb);
+		return curlecCallbackUrl;
 	}
-	saveToDB.saveResponseToDB(statusResponsedb);
-	return curlecCallbackUrl;
-	}
-	
 
 	@GetMapping(value = "/ping")
 	public String pingServer() {

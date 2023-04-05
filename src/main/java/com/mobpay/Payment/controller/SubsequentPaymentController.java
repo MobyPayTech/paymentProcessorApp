@@ -1,24 +1,7 @@
 package com.mobpay.Payment.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mobpay.Payment.Helper.PaymentValidation;
-import com.mobpay.Payment.Repository.MobiversaSubPaymentRepository;
-import com.mobpay.Payment.Repository.MobiversaSubPaymentResponseRepository;
-import com.mobpay.Payment.Repository.PaymentRequestEntityRepository;
-import com.mobpay.Payment.Repository.PaymentResponseEntityRepository;
-import com.mobpay.Payment.Service.CurlecSubsequentPaymentService;
-import com.mobpay.Payment.Service.MobiversaPaymentService;
-import com.mobpay.Payment.dao.InitMandate;
-import com.mobpay.Payment.dao.MobiversaSaveCardInputPaymentRequest;
-import com.mobpay.Payment.dao.MobiversaSaveCardPaymentRequest;
-import com.mobpay.Payment.dao.MobiversaSaveCardPaymentResponse;
-import com.mobpay.Payment.dao.PaymentRequest;
-import com.mobpay.Payment.dao.PaymentResponse;
-import com.mobpay.Payment.dao.SubsequentPaymentRequest;
-import com.mobpay.Payment.dao.SubsequentPaymentResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 
-import javax.validation.Valid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mobpay.Payment.Repository.MobiversaSubPaymentRepository;
+import com.mobpay.Payment.Repository.MobiversaSubPaymentResponseRepository;
+import com.mobpay.Payment.Service.MobiversaPaymentService;
+import com.mobpay.Payment.Service.SlackService;
+import com.mobpay.Payment.dao.MobiversaSaveCardInputPaymentRequest;
+import com.mobpay.Payment.dao.MobiversaSaveCardPaymentResponse;
 
-import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
@@ -109,7 +98,10 @@ public class SubsequentPaymentController {
     
 */
 	
-	 @Autowired
+	   @Autowired
+	   SlackService  slackService;
+	
+	    @Autowired
 	    MobiversaPaymentService mobiversaService;
 	 
 	   
@@ -137,6 +129,7 @@ public class SubsequentPaymentController {
     @PostMapping(value = "/api/payment/mobiversapayment")
 	public Object callMobiversaSaveCard(@RequestBody MobiversaSaveCardInputPaymentRequest inputRequest) throws Exception {
 		log.info("Inside mobiversapayment" +inputRequest);
+		slackService.sendMessageToSlack("Inside mobiversapayment" +inputRequest);
 		MobiversaSaveCardPaymentResponse paymentResponse = new MobiversaSaveCardPaymentResponse();
 		ResponseEntity<String> response = null;
 		ObjectMapper mapper = new ObjectMapper();
@@ -147,12 +140,14 @@ public class SubsequentPaymentController {
 				|| inputRequest.getBillCode() == null  || inputRequest.getAmount() == null ){
 			log.info("Mandatory value is empty..!! ");
 			paymentResponse.setResponseCode("01");
+		
 			paymentResponse.setResponseMsg("Bad Request ");
 
 		}
 		else  {
 			response = mobiversaService.callMobiversaSaveCardPaymentService(inputRequest) ;
 			log.info("Response from Mobiversa service " +response);
+			slackService.sendMessageToSlack("Response from Mobiversa service " +response);
 			String body = response.getBody();
 			JSONObject bodyJSON = new JSONObject(body);
 			log.info("bodyJSON " + bodyJSON);
