@@ -124,6 +124,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 					+ "&employeeId=" + dbvalues.get(GlobalConstants.AP_CURLEC_EMP_ID) + "&refNumber="
 					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
 					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+"&authorizeRM1=" + paymentRequest.getAuthorizeRM1()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
 					+ "&method=chargenowOTP";
 		} else if (paymentRequest.getClientType() == 2) {
@@ -131,6 +132,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 					+ "&employeeId=" + dbvalues.get(GlobalConstants.MP_CURLEC_EMP_ID) + "&refNumber="
 					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
 					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+"&authorizeRM1=" + paymentRequest.getAuthorizeRM1()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
 					+ "&method=chargenowOTP";
 		} else if (paymentRequest.getClientType() == 99) {
@@ -138,6 +140,7 @@ public class CurlecPaymentServiceImpl implements CurlecPaymentService {
 					+ "&employeeId=" + dbvalues.get(GlobalConstants.PLATFOR_MP_LEGACY_EMPID) + "&refNumber="
 					+ paymentRequest.getRefNumber() + "&collectionAmount=" + paymentRequest.getAmount()
 					+ "&invoiceNumber=" + paymentRequest.getBillCode() + "-" + paymentRequest.getUniqueRequestNo()
+					+"&authorizeRM1=" + paymentRequest.getAuthorizeRM1()
 					+ "&collectionCallbackUrl=" + callBackUrl + "&redirectUrl=" + paymentRequest.getRedirectUrl()
 					+ "&method=chargenowOTP";
 		}

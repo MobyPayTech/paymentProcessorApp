@@ -22,23 +22,22 @@ public class SlackService {
 
 	private String webhook = "https://hooks.slack.com/services/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";
 
-	public void sendMessageToSlack(String slackLogs) {
+	public void sendMessageToSlack(String message) {
 
 		StringBuilder messageBuider = new StringBuilder();
-		messageBuider.append(slackLogs + NEW_LINE);
+		messageBuider.append(message + NEW_LINE);
 		process(messageBuider.toString());
 	}
 
 	private void process(String message) {
 
-		Payload payload = Payload.builder()
-				.attachments(Collections.singletonList(Attachment.builder().channelName("#pp").build()))
+		Payload payload = Payload.builder().attachments(Collections.singletonList(Attachment.builder().channelName("#user-created").build()))
 				.text(message).build();
 		try {
 			WebhookResponse webhookResponse = Slack.getInstance().send(webhook, payload);
 			if (webhookResponse.getCode() == 200)
 				log.info("Success send slack !");
-
+			
 			log.info(webhookResponse.getMessage());
 		} catch (IOException e) {
 			log.error("Unexpected Error! WebHook:" + webhook);

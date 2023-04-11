@@ -43,6 +43,8 @@ public class ChargeUserRequest {
     private Date createdAt;
     @Column(name = "UpdatedAt")
     private Date updatedAt;
+    @Column(name = "authorizeRM1")
+    private Boolean authorizeRM1;
     
     
 }

@@ -1003,7 +1003,8 @@ public class PaymentController {
 	@GetMapping(value = "/chargeNow")
 	public ResponseEntity<Void> simulateCurlecCharge(@RequestParam String merchantId, @RequestParam String employeeId,
 			@RequestParam String refNumber, @RequestParam String collectionAmount, @RequestParam String invoiceNumber,
-			@RequestParam String collectionCallbackUrl, @RequestParam String redirectUrl, @RequestParam String method) {
+			@RequestParam String collectionCallbackUrl, @RequestParam String redirectUrl, @RequestParam String method,
+			@RequestParam Boolean authorizeRM1) {
 		log.info("Inside simulatorCharge ");
 		logger.info("Inside [PaymentController:simulateCurlecCharge] - Inside simulatorCharge ");
 		String url = null;
@@ -1033,7 +1034,8 @@ public class PaymentController {
 			logger.info(
 					"Inside [PaymentController:simulateCurlecCharge] - Response From Merchant " + responseFromMerchant);
 
-			url = redirectUrl + "?reference_number=" + refNumber + "&invoice_number=" + invoiceNumber
+			url = redirectUrl + "?reference_number=" + refNumber + "&invoice_number=" + invoiceNumber+
+					"&authorizeRM1=" + authorizeRM1
 					+ "&collection_status=SUCCESSFULLY_COMPLETE&cc_transaction_id=" + ccTransaction;
 			log.info("Redirect url " + redirectUrl);
 			logger.info("Inside [PaymentController:simulateCurlecCharge] - Redirect url " + redirectUrl);
