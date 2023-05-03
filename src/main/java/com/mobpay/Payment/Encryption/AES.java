@@ -1,15 +1,14 @@
 package com.mobpay.Payment.Encryption;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
- 
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Hex;
 public class AES {
 	private static SecretKeySpec secretKey;
     private static byte[] key;

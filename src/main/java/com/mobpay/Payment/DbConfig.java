@@ -3,16 +3,11 @@ package com.mobpay.Payment;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.dao.PaymentProcessorsysconfig;

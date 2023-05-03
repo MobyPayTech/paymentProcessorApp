@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +23,6 @@ import com.mobpay.Payment.Repository.PaymentProcessorAuthRepository;
 import com.mobpay.Payment.Repository.PaymentProcessorConfigRepository;
 import com.mobpay.Payment.Service.GlobalConstants;
 import com.mobpay.Payment.dao.PaymentProcessorAuthDao;
-import com.mobpay.Payment.dao.PaymentProcessorsysconfig;
 
 @EnableWebSecurity
 @Order(1)

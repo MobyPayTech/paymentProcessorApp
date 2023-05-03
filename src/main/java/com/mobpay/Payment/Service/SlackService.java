@@ -20,7 +20,7 @@ public class SlackService {
 
 	private static final String NEW_LINE = "\n";
 
-	private String webhook = "https://hooks.slack.com/services/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";
+	private String webhook = "https://hooks.slack.com/services/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";
 
 	public void sendMessageToSlack(String message) {
 
